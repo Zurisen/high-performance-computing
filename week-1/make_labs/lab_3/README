@@ -1,25 +1,31 @@
-Make and Makefiles - exercise 3
--------------------------------
+Make and Makefiles - exercise 2
+--------------------------------
 
-Re-use the files from exercise 2 by copying them into this directory.
+a) Use the source files in this directory and craft a Makefile that
+satisfies the following dependency graph:
 
-Remove all the dependency lines, i.e.
+               + data.o --- +  data.c  
+               |             \ 
+               |              + data.h
+               |             /
+excer2.exe --- + main.o --- + main.c
+               |             \ 
+               |              + io.h
+               |             /
+               +  io.o  --- +
 
-main.o: main.c data.h io.h
-data.o: ...
-...
+This time, you should make use of the built-in rules, to remove as many
+redundant parts in your Makefile as possible.  You can either start with
+the Makefile from exercise 1, and do the necessary changes, or start
+with a new Makefile from scratch.
 
-from your Makefile.
+In the end, your Makefile should contain at least:
 
-- Run the 'makedepend *.c' command.  What happens to your Makefile?  
-- Read the man-pages of 'makedepend' to find a way to get rid of external
-  dependcies, i.e. references to file like /usr/include/stdio.h, etc.
-  Note:  ignore the warnings, if there are related to external files.
-- Re-run makedepend with the new options.  Look at the Makefile.
-- Note:  makedepend is part of the X11 software tools, and thus not
-  always installed on all systems!  An alternative in this case can be
-  the C compiler.  Try to find out, if both cc and gcc can help you,
-  in case makedepend is missing on your system.
+    - an OBJECT macro that lists all the .o files
+    - a CFLAGS macro, that defines the compiler flags '-g -O3'
+    - the CC macro, so you can easily switch compiler
 
-Note:  If you are using the compiler to generate dependencies, they
-       are not added automatically to your Makefile
+- Run 'make' and verify that the code compiles correctly.  
+- Try to run 'make -r'?  What happens?  Why?
+- Run make with the compiler flags '-g -O2' _without_ changing the
+  Makefile.  How can you achieve that?
