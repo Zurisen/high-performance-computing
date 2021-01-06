@@ -9,5 +9,5 @@ double distance(particle_t *, int);
 double distance(particle_t , int);
 #endif
 
-#define DIST_FLOP 10 // put the right value here
+#define DIST_FLOP 4 // put the right value here
 #endif

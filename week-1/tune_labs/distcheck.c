@@ -2,27 +2,27 @@
 #include "distcheck.h"
 #include <unistd.h>
 
-
-
 #ifdef ARRAY_OF_STRUCTS
 double 
 distcheck(particle_t *p, int n) {
 
-    double tot = 0;
-    for(int i = 0; i<n; i++){
-	    tot += p[i].dist;
+    double dist = -99.0;
+    int i;
+    for (i=0; i<n; i++){
+        dist += p[i].dist;
     }
-    return tot;
+    
+    return dist;
 }
 #else
-
 double 
-distcheck(double *v, int n) {
+distcheck(particle_t p, int n) {
 
-    double tot = 0;
-    for(int i = 0; i<n, i++){
-	    tot += v[i];
+    double dist = -99.0;
+    int i;
+    for (i=0; i<n; i++){
+        dist += p.dist[i];
     }
-    return tot;
+    return dist;
 }
 #endif
