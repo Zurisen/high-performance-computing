@@ -17,7 +17,7 @@
 # valid values: matmult_c.studio, matmult_f.studio, matmult_c.gcc or
 # matmult_f.gcc
 #
-EXECUTABLE=matmult_f.gcc
+EXECUTABLE=matmult_c.gcc
 
 # define the mkn values in the MKN variable
 #
@@ -25,7 +25,7 @@ SIZES="100 200 500"
 
 # define the permutation type in PERM
 #
-PERM="mkn"
+PERM="nat"
 
 # uncomment and set a reasonable BLKSIZE for the blk version
 #
