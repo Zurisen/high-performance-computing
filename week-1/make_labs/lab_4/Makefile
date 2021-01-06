@@ -7,3 +7,5 @@ f90project: $(OBJECTS)
 
 clean:
 	@/bin/rm -f *.o core
+
+f90main.o: f90main.f90

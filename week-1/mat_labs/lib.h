@@ -1,0 +1,8 @@
+int matadd(int m, int n, double** A, double** B, double** C);
+int matvec(int m, int k, double** A, double* B, double* C);
+int matmat(int m, int n, int k, double** A, double** B, double** C);
+double* malloc_1d(int k);
+void free_1d(double *A);
+void init_vec(int k, double *A);
+void init_mat(int m, int n, int r, int s, double **A);
+double* flatten_mat(double **A, int m, int n);

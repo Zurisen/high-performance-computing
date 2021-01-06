@@ -1,0 +1,85 @@
+Lab exercise 'data structure'
+----------------------------
+
+Imagine you have a 3-dimensional box with NUM_OF_PARTS particles, that are
+randomly distributed within the box of size 1x1x1 (in arbitrary units).
+
+Use the template files in this directory,
+
+Makefile
+data.h
+distance.h
+distcheck.h
+init_data.c
+init_data.h
+main.c
+testsource
+xtime.c
+xtime.h
+
+to write two programs, with two different data structure layouts (as
+shown in the lecture).
+
+
+Part 1:
+-------
+
+You need to provide two subroutines, distance(...) and distcheck(...),
+for both types of data structures.  In distance(...) you should calculate
+the distance of each particle to the point (0,0,0) and the total sum
+of all distances.  In distcheck(...), you sum up only the distances,
+i.e. you should only access the distance part of your data.  Print both
+results during the test phase to have a check for consistency.
+
+You need also to provide a measure for the number of floating point
+operations in each subroutine, counted per particle.  Those numbers,
+DIST_FLOP and CHECK_FLOP will be used in main.c to calculate the Mflop/s
+numbers.  Hint:  For the sake of simplicity, assume that the sqrt()
+function counts 4 FLOPs.
+
+The program takes two command line arguments: the number of loops and
+the number of particles.  The first one has a default value of 1, the
+latter the compiled in default NUM_OF_PARTS (see data.h).  With those
+two parameters, you can control the size (memory footprint) and runtime
+of your problem.
+
+Both programs print out 5 values (on a single line):
+
+    memory footprint in kB
+    Mflop/s of distance(...)
+    Mflop/s of distcheck(...)
+    Mflop/s of total program
+    runtime in secs
+
+You can check those values easily:  For a given memory footprint, the
+Mflop/s numbers shouldn't vary much when varying the number of loops,
+and the runtime in secs should correspond approximately to the value
+you can obtain with the 'time program ...' command.
+
+During the test phase, you can undefine the -DDATA_ANALYSIS in the
+Makefile, to get a more verbose output.
+
+
+Part 2:
+-------
+
+Run a series of experiments for both programs, e.g. for 2000 ... 3000000
+particles (choose the stepsize in a clever way) and 1000 loops.  Plot the
+runtimes and Mflop/s numbers versus the memory footprint, as shown in
+the lecture notes.  Under which conditions is one version faster, when
+the other one?
+
+
+Part 3:
+-------
+
+Use the Sun Studio analyzer to find out more about the program.  Use
+memory footprint values from part 2, that are below and above the
+level 2 cache size (how can you tell from the plots in part 2?), to do
+those experiments.  
+
+a) run a 'standard' experiment with the analyzer and look for the 'hot
+   spots' in both programs
+b) use the hardware counter to compare the L2 cache references (E$
+   Refs) and L2 cache misses (E$ Misses) for both programs and
+   different system sizes (memory footprints).
