@@ -18,7 +18,7 @@ main(int argc, char *argv[]) {
 
     clock_t t1, t2;
 
-    int k=5
+    int k=5;
 
     for (m = 200; m <= 3500; m += 300) {
 	n = m + 25;
@@ -34,19 +34,17 @@ main(int argc, char *argv[]) {
 
 	/* initialize with useful data - last argument is reference */
 	init_mat(m, k, 1, 1, A);
-	init_mat(km n, 2, 2, B);
+	init_mat(k, n, 2, 2, B);
 
 	/* timings */
 	t1 = mytimer();
 	for (i = 0; i < N; i++)
-	    matmat(m, n, k,A, B, C);
+	    matmat(m, n, k, A, B, C);
 	t2 = mytimer();
 	tcpu1 = delta_t(t1, t2) / N;
 
-	check_results("main", m, n, C);
-
 	/* Print n and results  */
-	printf("MATRIX X VECTOR\n");
+	printf("MATRIX X MATRIX\n");
 	printf("%4d %4d %8.3f\n", m, n,tcpu1);
 
 	/* Free memory */
