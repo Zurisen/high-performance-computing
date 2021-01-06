@@ -9,7 +9,7 @@ OPT	= -O3
 PARA	= 
 CFLAGS	= $(DBG) $(OPT) $(PARA) $(XOPTS)
 
-LIBS	= 
+LIBS	= -L /usr/lib64/atlas-lsatlas
 
 all: $(TARGET)
 

@@ -4,7 +4,7 @@
 
 #include "datatools.h"		/* helper functions	        */
 #include "lib.h"		/* my matrix add fucntion	*/
-#include <cblas-atlas.h>	/* Cblas */
+#include "cblas.h" 
 
 #define NREPEAT 100		/* repeat count for the experiment loop */
 
