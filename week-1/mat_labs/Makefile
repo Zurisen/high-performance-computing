@@ -1,4 +1,4 @@
-SRCS	= main_vec.c datatools.c lib.c
+SRCS	= main_mul3.c datatools.c lib.c
 OBJS	= $(SRCS:.c=.o)
 TARGET	= madd.$(CC)
 

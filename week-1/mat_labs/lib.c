@@ -72,11 +72,30 @@ void init_vec(int k, double *A) {
 
 void init_mat(int m, int n, int r, int s, double **A) {
   int i, j, val;
-  val = r * 10 + s;
-
   for( i = 0; i < m; i++) {
     for( j = 0; j < n; j++) {
+	    val = i * 10 + j;
 	    A[i][j] = val;
+    }
+  }
+}
+
+void init_matA(int m, int n, double **A) {
+  int i, j, val;
+  for( i = 0; i < m; i++) {
+    for( j = 0; j < n; j++) {
+            val = i * 10 + j;
+            A[i][j] = val;
+    }
+  }
+}
+
+void init_matB(int m, int n, double **A) {
+  int i, j, val;
+  for( i = 0; i < m; i++) {
+    for( j = 0; j < n; j++) {
+            val = i * 20 + j;
+            A[i][j] = val;
     }
   }
 }

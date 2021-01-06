@@ -5,4 +5,6 @@ double* malloc_1d(int k);
 void free_1d(double *A);
 void init_vec(int k, double *A);
 void init_mat(int m, int n, int r, int s, double **A);
+void init_matA(int m, int n, double **A);
+void init_matB(int m, int n, double **A);
 double* flatten_mat(double **A, int m, int n);
