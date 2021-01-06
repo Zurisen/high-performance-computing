@@ -18,12 +18,14 @@ main(int argc, char *argv[]) {
 
     clock_t t1, t2;
 
+    int k=5
+
     for (m = 200; m <= 3500; m += 300) {
 	n = m + 25;
 
 	/* Allocate memory */
-	A = malloc_2d(m, n);
-	B = malloc_2d(m, n);
+	A = malloc_2d(m, k);
+	B = malloc_2d(k, n);
 	C = malloc_2d(m, n);
 	if (A == NULL || B == NULL | C == NULL) {
 	    fprintf(stderr, "Memory allocation error...\n");
@@ -31,20 +33,17 @@ main(int argc, char *argv[]) {
 	}
 
 	/* initialize with useful data - last argument is reference */
-	init_data(m,n,A,B);
-
-	double *x, *y;
-	x = malloc_1d(n);
-	y = malloc_1d(n);
-
-	init_vec(n, x);
+	init_mat(m, k, 1, 1, A);
+	init_mat(km n, 2, 2, B);
 
 	/* timings */
 	t1 = mytimer();
 	for (i = 0; i < N; i++)
-	    matvec(m, n, A, x, y);
+	    matmat(m, n, k,A, B, C);
 	t2 = mytimer();
 	tcpu1 = delta_t(t1, t2) / N;
+
+	check_results("main", m, n, C);
 
 	/* Print n and results  */
 	printf("MATRIX X VECTOR\n");
@@ -54,8 +53,6 @@ main(int argc, char *argv[]) {
 	free_2d(A);
 	free_2d(B);
 	free_2d(C);
-	free_1d(x);
-	free_1d(y);
 		
     }
 
