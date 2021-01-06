@@ -28,18 +28,18 @@ int matvec(int m, int k, double** A, double* B, double* C) {
   }
 };
 
-int matmat(int m, int n, int k, double** A, double** B, double** C) {
-  int i, j, l;
+int matmat(int m, int n, int k, double **A, double **B, double **C) {
+    double tmp_val;
 
-  for (i = 0; i < m; i++) {
-    for (j = 0; j < n; j++) {
-      C[i][j] = 0;
+    for(int i = 0; i < m; i++) {
+    	for(int j = 0; j < n; j++) {
+			C[i][j] = 0;
+			for(int l = 0; l < k; l++) {
+				C[i][j] += A[i][l] * B[l][j];
+			}
+    	}	
     }
-    for (l = 0; l < k; l++) {
-      C[i][j] += A[i][k] * A[k][j];
-    }
-  }
-};
+}
 
 double* malloc_1d(int k) {
   
@@ -80,22 +80,22 @@ void init_mat(int m, int n, int r, int s, double **A) {
   }
 }
 
-void init_matA(int m, int n, double **A) {
+void init_matA(int m, int k, double **A) {
   int i, j, val;
   for( i = 0; i < m; i++) {
-    for( j = 0; j < n; j++) {
-            val = i * 10 + j;
+    for( j = 0; j < k; j++) {
+            val = (i+1) * 10 + (j+1);
             A[i][j] = val;
     }
   }
 }
 
-void init_matB(int m, int n, double **A) {
+void init_matB(int k, int n, double **B) {
   int i, j, val;
-  for( i = 0; i < m; i++) {
+  for( i = 0; i < k; i++) {
     for( j = 0; j < n; j++) {
-            val = i * 20 + j;
-            A[i][j] = val;
+            val = (i+1) * 20 + (j+1);
+            B[i][j] = val;
     }
   }
 }

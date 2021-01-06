@@ -18,10 +18,9 @@ main(int argc, char *argv[]) {
 
     clock_t t1, t2;
 
-    int k=5;
-
-    for (m = 200; m <= 3500; m += 300) {
-	n = 20;
+    int k = 5;
+	m = 3;
+	n = 2;
 
 	/* Allocate memory */
 	A = malloc_2d(m, k);
@@ -33,8 +32,8 @@ main(int argc, char *argv[]) {
 	}
 
 	/* initialize with useful data - last argument is reference */
-	init_mat(m, k, 1, 1, A);
-	init_mat(k, n, 2, 2, B);
+	init_matA(m, k, A);
+	init_matB(k, n, B);
 
 	/* timings */
 	t1 = mytimer();
@@ -46,13 +45,12 @@ main(int argc, char *argv[]) {
 	/* Print n and results  */
 	printf("MATRIX X MATRIX\n");
 	printf("%4d %4d %8.3f\n", m, n,tcpu1);
+	printf("%8.3f\n", C[0][1]);
 
 	/* Free memory */
 	free_2d(A);
 	free_2d(B);
 	free_2d(C);
 		
-    }
-
     return EXIT_SUCCESS;
 }
