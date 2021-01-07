@@ -3,9 +3,6 @@
 #include <cblas.h>
 
 void matmult_mnk(int M, int N, int K, double **A, double **B, double **C) {
-	for (int l = 0; l < M*N; l++) {
-		C[0][l] = 0;
-	}
     	for (int m = 0; m < M; m++) {
     		for (int n = 0; n < N; n++) {
 			for (int k = 0; k < K; k++) {
@@ -16,9 +13,6 @@ void matmult_mnk(int M, int N, int K, double **A, double **B, double **C) {
 }
 
 void matmult_mkn(int M, int N, int K, double **A, double **B, double **C) {
-	for (int l = 0; l < M*N; l++) {
-		C[0][l] = 0;
-	}
     for (int m = 0; m < M; m++) {
     	for (int k = 0; k < K; k++) {
 			for (int n = 0; n < N; n++) {
@@ -29,9 +23,6 @@ void matmult_mkn(int M, int N, int K, double **A, double **B, double **C) {
 }
 
 void matmult_nmk(int M, int N, int K, double **A, double **B, double **C) {
-	for (int l = 0; l < M*N; l++) {
-		C[0][l] = 0;
-	}
     for (int n = 0; n < N; n++) {
     	for (int m = 0; m < M; m++) {
 			for (int k = 0; k < K; k++) {
@@ -42,9 +33,6 @@ void matmult_nmk(int M, int N, int K, double **A, double **B, double **C) {
 }
 
 void matmult_nkm(int M, int N, int K, double **A, double **B, double **C) {
-	for (int l = 0; l < M*N; l++) {
-		C[0][l] = 0;
-	}
     for (int n = 0; n < N; n++) {
     	for (int k = 0; k < K; k++) {
 			for (int m = 0; m < M; m++) {
@@ -55,9 +43,6 @@ void matmult_nkm(int M, int N, int K, double **A, double **B, double **C) {
 }
 
 void matmult_kmn(int M, int N, int K, double **A, double **B, double **C) {
-	for (int l = 0; l < M*N; l++) {
-		C[0][l] = 0;
-	}
     for (int k = 0; k < K; k++) {
     	for (int m = 0; m < M; m++) {
 			for (int n = 0; n < N; n++) {
@@ -68,9 +53,6 @@ void matmult_kmn(int M, int N, int K, double **A, double **B, double **C) {
 }
 
 void matmult_knm(int M, int N, int K, double **A, double **B, double **C) {
-	for (int l = 0; l < M*N; l++) {
-		C[0][l] = 0;
-	}
     for (int k = 0; k < K; k++) {
     	for (int n = 0; n < N; n++) {
 			for (int m = 0; m < M; m++) {
@@ -116,9 +98,6 @@ void matmult_blk(int M, int N, int K, double **A, double **B, double **C, int bs
 	// MKN
 
 	bs = fmax(1, fmin(bs, K));
-
-	for (int i = 0; i < M*N; i++)
-		C[0][i] = 0.0;
 
 	for (int m0 = 0; m0 < M; m0 += bs)
 	{

@@ -25,7 +25,7 @@ SIZES="100 200 500"
 
 # define the permutation type in PERM
 #
-PERM="nat"
+PERM="blk"
 
 # uncomment and set a reasonable BLKSIZE for the blk version
 #
