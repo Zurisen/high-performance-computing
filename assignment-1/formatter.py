@@ -1,12 +1,14 @@
 """
 Python scipt to extract data from the .out files
-in /results and create the txt in results_text/
+in /results and create the txt in results_text/ to
+later plot them
 """
 
-# import matplotlib.pyplot as plt
+NUM_LINES = 5; # num of lines from .out to extract
+
 import glob,os
 
-# create folder to dump the txt
+# create folder to save the txt
 if not os.path.exists('results_txt'):
     os.makedirs('results_txt')
 
@@ -16,15 +18,13 @@ for outfile in glob.glob(os.path.join('*.out') ):
     new_file = open("results_txt/" + outfile + ".txt", "w")
     print(outfile + ".txt")
 
-
     # we only need first 5 lines of .out file
-    # not the cleanest code
     Lines = f.readlines() 
     count = 1
     for line in Lines: 
     	print(line)
     	new_file.writelines(line)
 
-    	if (count > 5):
+    	if (count > NUM_LINES):
     		break
     	count += 1
