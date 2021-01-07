@@ -1,21 +1,41 @@
-
 #include <math.h>
 #include <cblas.h>
 
+/* permutations of loops for matrix multiplication */
 void matmult_mnk(int M, int N, int K, double **A, double **B, double **C) {
-    	for (int m = 0; m < M; m++) {
-    		for (int n = 0; n < N; n++) {
-			for (int k = 0; k < K; k++) {
+    int k, n, m;
+
+    /* fill C matrix */
+    for (m = 0; m < M; m++) {
+    	for (n = 0; n < N; n++) {
+    		C[m][n] = 0;
+    	}
+    }
+
+    /* matrix multiplication */
+    for (m = 0; m < M; m++) {
+    	for (n = 0; n < N; n++) {
+			for (k = 0; k < K; k++) {
 				C[m][n] += A[m][k] * B[k][n];
-		}
+			}
     	}	
     }
 }
 
 void matmult_mkn(int M, int N, int K, double **A, double **B, double **C) {
-    for (int m = 0; m < M; m++) {
-    	for (int k = 0; k < K; k++) {
-			for (int n = 0; n < N; n++) {
+    int k, n, m;
+
+    /* fill C matrix */
+    for (m = 0; m < M; m++) {
+    	for (n = 0; n < N; n++) {
+    		C[m][n] = 0;
+    	}
+    }
+
+    /* matrix multiplication */
+    for (m = 0; m < M; m++) {
+    	for (k = 0; k < K; k++) {
+			for (n = 0; n < N; n++) {
 				C[m][n] += A[m][k] * B[k][n];
 			}
     	}	
@@ -23,9 +43,19 @@ void matmult_mkn(int M, int N, int K, double **A, double **B, double **C) {
 }
 
 void matmult_nmk(int M, int N, int K, double **A, double **B, double **C) {
-    for (int n = 0; n < N; n++) {
-    	for (int m = 0; m < M; m++) {
-			for (int k = 0; k < K; k++) {
+    int k, n, m;
+
+    /* fill C matrix */
+    for (m = 0; m < M; m++) {
+    	for (n = 0; n < N; n++) {
+    		C[m][n] = 0;
+    	}
+    }
+
+    /* matrix multiplication */
+    for (n = 0; n < N; n++) {
+    	for (m = 0; m < M; m++) {
+			for (k = 0; k < K; k++) {
 				C[m][n] += A[m][k] * B[k][n];
 			}
     	}	
@@ -33,9 +63,19 @@ void matmult_nmk(int M, int N, int K, double **A, double **B, double **C) {
 }
 
 void matmult_nkm(int M, int N, int K, double **A, double **B, double **C) {
-    for (int n = 0; n < N; n++) {
-    	for (int k = 0; k < K; k++) {
-			for (int m = 0; m < M; m++) {
+    int k, n, m;
+
+    /* fill C matrix */
+    for (m = 0; m < M; m++) {
+    	for (n = 0; n < N; n++) {
+    		C[m][n] = 0;
+    	}
+    }
+
+    /* matrix multiplication */
+    for (n = 0; n < N; n++) {
+    	for (k = 0; k < K; k++) {
+			for (m = 0; m < M; m++) {
 				C[m][n] += A[m][k] * B[k][n];
 			}
     	}	
@@ -43,9 +83,19 @@ void matmult_nkm(int M, int N, int K, double **A, double **B, double **C) {
 }
 
 void matmult_kmn(int M, int N, int K, double **A, double **B, double **C) {
-    for (int k = 0; k < K; k++) {
-    	for (int m = 0; m < M; m++) {
-			for (int n = 0; n < N; n++) {
+    int k, n, m;
+
+    /* fill C matrix */
+    for (m = 0; m < M; m++) {
+    	for (n = 0; n < N; n++) {
+    		C[m][n] = 0;
+    	}
+    }
+
+    /* matrix multiplication */
+    for (k = 0; k < K; k++) {
+    	for (m = 0; m < M; m++) {
+			for (n = 0; n < N; n++) {
 				C[m][n] += A[m][k] * B[k][n];
 			}
     	}	
@@ -53,27 +103,40 @@ void matmult_kmn(int M, int N, int K, double **A, double **B, double **C) {
 }
 
 void matmult_knm(int M, int N, int K, double **A, double **B, double **C) {
-    for (int k = 0; k < K; k++) {
-    	for (int n = 0; n < N; n++) {
-			for (int m = 0; m < M; m++) {
+    int k, n, m;
+
+    /* fill C matrix */
+    for (m = 0; m < M; m++) {
+    	for (n = 0; n < N; n++) {
+    		C[m][n] = 0;
+    	}
+    }
+
+    /* matrix multiplication */
+    for (k = 0; k < K; k++) {
+    	for (n = 0; n < N; n++) {
+			for (m = 0; m < M; m++) {
 				C[m][n] += A[m][k] * B[k][n];
 			}
     	}	
     }
 }
 
-
+/* Original permutation for matrix multiplication (mnk)*/
 void matmult_nat(int M, int N, int K, double **A, double **B, double **C) {
-	for (int m = 0; m < M; m++) {
-		for (int n = 0; n < N; n++) {
+	int k, n, m;
+
+	for (m = 0; m < M; m++) {
+		for (n = 0; n < N; n++) {
 			C[m][n] = 0;
-			for (int k = 0; k < K; k++) {
+			for (k = 0; k < K; k++) {
 				C[m][n] += A[m][k] * B[k][n];
 			}
     	}	
     }
 }
 
+/* Native CBLAS implementation of matrix multiplication */
 void matmult_lib(int M, int N, int K, double **A, double **B, double **C) {
 	int layout, TRANSA, TRANSB, LDA, LDB, LDC;
 	double alpha, beta;
@@ -93,10 +156,11 @@ void matmult_lib(int M, int N, int K, double **A, double **B, double **C) {
 	cblas_dgemm(layout, TRANSA, TRANSB, M, N, K, alpha, *A, LDA, *B, LDB, beta, *C, LDC);    
 }
 
+
+/* Matrix multiplications using batches */
 void matmult_blk(int M, int N, int K, double **A, double **B, double **C, int bs) 
 {
-	// MKN
-
+	/* for the best performing permutation (mkn) */
 	bs = fmax(1, fmin(bs, K));
 
 	for (int m0 = 0; m0 < M; m0 += bs)
