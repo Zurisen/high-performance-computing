@@ -142,23 +142,29 @@ void matmult_lib(int M, int N, int K, double **A, double **B, double **C) {
         cblas_dgemm(CblasRowMajor,CblasNoTrans,CblasNoTrans,M,N,K,alpha,A[0],K,B[0],N,beta,C[0],N);
 }
 
-/* Matrix multiplications using batches */
+/* Matrix multiplications using batches (for best permutation mkn)*/
 void matmult_blk(int M, int N, int K, double **A, double **B, double **C, int bs) 
-{
-	/* for the best performing permutation (mkn) */
+{   
+
+    int m0, n0, m, k, n;
+
+	/* case batch is too large */
 	bs = fmax(1, fmin(bs, K));
 
-	for (int m0 = 0; m0 < M; m0 += bs)
-	{
-		for (int k0 = 0; k0 < K; k0 += bs)
-		{
-			for (int n0 = 0; n0 < N; n0 += bs)
-			{
-				for (int m = m0; m < fmin(m0 + bs, M); m++)
-				{
-					for (int k = k0; k < fmin(k0 + bs, K); k++)
-					{
-						for (int n = n0; n < fmin(n0 + bs, N); n++)
+    /* Fill in C matrix */
+    for (m0 = 0; i < M; i++) {
+        for (n0 = 0; j < N; j++) {
+            C[i][j] == 0;
+        }
+    }
+
+    /* Matrix multiplication with batches */
+	for (m0 = 0; m0 < M; m0 += bs) {
+		for (k0 = 0; k0 < K; k0 += bs) {
+			for (n0 = 0; n0 < N; n0 += bs) {
+				for (m = m0; m < fmin(m0 + bs, M); m++) {
+					for (k = k0; k < fmin(k0 + bs, K); k++) {
+						for (n = n0; n < fmin(n0 + bs, N); n++)
 							C[m][n] += A[m][k] * B[k][n];
 					}
 				}
