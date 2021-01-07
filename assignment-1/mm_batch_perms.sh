@@ -29,7 +29,7 @@ size_its=( [10]=5000000 [50]=30000 [100]=4000 [500]=20 [1000]=4 [2000]=1 [5000]=
 
 for size in 10 50 100 500 1000 2000 5000
 do 
-	MKN = "${size} ${size} ${size}"
+	MKN="${size} ${size} ${size}"
 
 	for permutation in kmn mkn nkm knm mnk nkm
 	do
