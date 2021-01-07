@@ -1,0 +1,6 @@
+     2.344    978.488 0 # matmult_mkn
+    58.594   3456.308 0 # matmult_mkn
+   234.375   3336.205 0 # matmult_mkn
+   937.500   3595.034 0 # matmult_mkn
+  5859.375   3874.980 0 # matmult_mkn
+
