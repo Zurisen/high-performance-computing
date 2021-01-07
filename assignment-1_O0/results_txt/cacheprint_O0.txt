@@ -1,0 +1,20 @@
+Functions sorted by metric: Exclusive Total CPU Time
+
+Excl.     Incl.     Excl. L1      Excl. L1   Excl. L2   Excl. L2   Name
+Total     Total     D-cache Hits  D-cache    Cache      Cache
+CPU sec.  CPU sec.                Misses     Hits       Misses
+38.807    38.807    132422670367  169653056  163251053  3003006    <Total>
+ 6.645     6.645     22022063256   60819019   57618018  2002004    matmult_nkm
+ 6.635     6.635     22022063243   35211011   38412012  1001002    matmult_knm
+ 6.394     6.394     22032073293   35211014   32010012        0    matmult_mnk
+ 6.384     6.384     22142183619   16005005   12804005        0    matmult_kmn
+ 6.384     6.384     22102143478    6402002    9603002        0    matmult_mkn
+ 6.354     6.354     22102143478   16005005   12804004        0    matmult_nmk
+ 0.010     0.010               0          0          0        0    sigprocmask
+ 0.        0.010               0          0          0        0    <static>@0x2d009 (<libcollector.so>)
+ 0.        0.010               0          0          0        0    __collector_reallocVSize
+ 0.       38.807               0          0          0        0    __libc_start_main
+ 0.        0.010               0          0          0        0    dlopen
+ 0.       38.807               0          0          0        0    main
+ 0.       38.807               0          0          0        0    mflops
+
