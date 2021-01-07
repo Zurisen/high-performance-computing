@@ -1,6 +1,0 @@
-     2.344    861.456 0 # matmult_nat
-    58.594   1448.720 0 # matmult_nat
-   234.375   1429.051 0 # matmult_nat
-   937.500   1225.850 0 # matmult_nat
-  5859.375   1078.622 0 # matmult_nat
-
