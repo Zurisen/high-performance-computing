@@ -45,6 +45,7 @@ export MATMULT_COMPARE=0
 #
 JID=${LSB_JOBID}
 EXPOUT="$LSB_JOBNAME.${JID}.er"
+CACHEPRINT="cacheprint_${JID}.txt"
 
 # uncomment the HWCOUNT line, if you want to use hardware counters
 # define an option string for the harwdware counters (see output of
@@ -53,7 +54,9 @@ EXPOUT="$LSB_JOBNAME.${JID}.er"
 #
 # the example below is for L1 hits, L1 misses, L2 hits, L2 misses
 #
+
 HWCOUNT="-h dch,on,dcm,on,l2h,on,l2m,on"
 
 # start the collect command with the above settings
 collect -o $EXPOUT $HWCOUNT ./$EXECUTABLE $PERM $MKN $BLKSIZE
+er_print -func $EXPOUT >> $CACHEPRINT
