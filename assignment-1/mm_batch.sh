@@ -21,18 +21,18 @@ EXECUTABLE=matmult_c.gcc
 
 # define the mkn values in the MKN variable
 #
-SIZES="100 200 500"
+SIZES="10 50 100 200 500"
 
 # define the permutation type in PERM
 #
-PERM="lib"
+PERM="kmn"
 
 # uncomment and set a reasonable BLKSIZE for the blk version
 #
 # BLKSIZE=1
 
 # enable(1)/disable(0) result checking
-export MATMULT_COMPARE=0
+export MATMULT_COMPARE=1
 
 # start the collect command with the above settings
 for S in $SIZES
