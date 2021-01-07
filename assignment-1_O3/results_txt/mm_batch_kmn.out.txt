@@ -1,0 +1,6 @@
+     2.344    964.620 0 # matmult_kmn
+    58.594   3544.569 0 # matmult_kmn
+   234.375   3419.312 0 # matmult_kmn
+   937.500   3291.032 0 # matmult_kmn
+  5859.375   3505.160 0 # matmult_kmn
+

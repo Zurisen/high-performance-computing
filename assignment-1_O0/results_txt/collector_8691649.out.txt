@@ -1,0 +1,6 @@
+Loaded module: studio/12u6
+Creating experiment database collector.8691649.er (Process ID: 6486) ...
+   234.375    312.774 # matmult_mnk
+   234.375    313.100 # matmult_mkn
+   234.375    313.223 # matmult_kmn
+   234.375    301.349 # matmult_knm

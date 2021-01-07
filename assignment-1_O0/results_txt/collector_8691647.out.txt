@@ -1,0 +1,6 @@
+Loaded module: studio/12u6
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@n-62-21-78>
+Subject: Job 8691647: <collector> in cluster <dcc> Done
+

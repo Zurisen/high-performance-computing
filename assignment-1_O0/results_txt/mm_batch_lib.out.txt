@@ -1,0 +1,6 @@
+     2.344   1071.925 0 # matmult_lib
+    58.594   6232.560 0 # matmult_lib
+   234.375   6949.044 0 # matmult_lib
+   937.500   8207.787 0 # matmult_lib
+  5859.375   8366.135 0 # matmult_lib
+
