@@ -1,4 +1,4 @@
-fndef __FUNC_LIB_H
+#ifndef __FUNC_LIB_H
 #define __FUNC_LIB_H
 
 void matmult_nat(int m, int n, int k, double **A, double **B, double **C);
