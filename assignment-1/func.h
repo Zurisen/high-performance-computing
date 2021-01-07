@@ -17,6 +17,6 @@ void matmult_lib(int m, int n, int k, double **A, double **B, double **C);
 
 /* matrix multiplication with batches */
 void matmult_blk(int m, int n, int k, double **A, double **B, double **C, int bs);
-void matmult_blk2(int m, int n, int k, double **A, double **B, double **C, int bs);
+//void matmult_blk2(int m, int n, int k, double **A, double **B, double **C, int bs);
 
 #endif
