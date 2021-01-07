@@ -1,5 +1,6 @@
 """
-Python scipt for plotting
+Python scipt to extract data from the .out files
+in /results and create the txt in results_text/
 """
 
 # import matplotlib.pyplot as plt
