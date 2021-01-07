@@ -157,9 +157,9 @@ void matmult_blk(int M, int N, int K, double **A, double **B, double **C, int bs
 	bs = fmax(1, fmin(bs, K));
 
     /* Fill in C matrix */
-    for (m0 = 0; i < M; i++) {
-        for (n0 = 0; j < N; j++) {
-            C[i][j] == 0;
+    for (m0 = 0; m0 < M; m0++) {
+        for (n0 = 0; n0 < N; n0++) {
+            C[m0][n0] == 0;
         }
     }
 
@@ -198,19 +198,19 @@ void matmult_blk2(int m, int n, int k, double **A, double **B, double **C, int b
             for (l = 0; l < k; l += bs){
                 // define limites for not surpase the matrix sizes.
                 if (i + bs > m){
-                    limit_i = m 
+                    limit_i = m;
                 }
                 else{
                     limit_i = i + bs;
                 }
                 if (j + bs > n){
-                    limit_j = n 
+                    limit_j = n;
                 }
                 else{
                     limit_j = j + bs;
                 }    
                 if (l + bs > k){
-                    limit_l = k 
+                    limit_l = k;
                 }
                 else{
                     limit_l = l + bs;
