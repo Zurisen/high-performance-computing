@@ -1,0 +1,83 @@
+     2.344    997.390 0 # matmult_mkn
+    58.594   3517.004 0 # matmult_mkn
+   234.375   3390.732 0 # matmult_mkn
+   937.500   3716.087 0 # matmult_mkn
+  5859.375   3956.749 0 # matmult_mkn
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@n-62-21-77>
+Subject: Job 8689745: <mm_batch> in cluster <dcc> Done
+
+Job <mm_batch> was submitted from host <gbarlogin1> by user <s202464> in cluster <dcc> at Thu Jan  7 19:42:14 2021
+Job was executed on host(s) <n-62-21-77>, in queue <hpcintro>, as user <s202464> in cluster <dcc> at Thu Jan  7 19:43:40 2021
+</zhome/7b/f/153842> was used as the home directory.
+</zhome/7b/f/153842/high-performance-computing/assignment-1_O3> was used as the working directory.
+Started at Thu Jan  7 19:43:40 2021
+Terminated at Thu Jan  7 19:43:56 2021
+Results reported at Thu Jan  7 19:43:56 2021
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+# 02614 - High-Performance Computing, January 2018
+# 
+# batch script to run matmult on a decidated server in the hpcintro
+# queue
+#
+# Author: Bernd Dammann <bd@cc.dtu.dk>
+#
+#BSUB -J mm_batch
+#BSUB -o mm_batch_%J.out
+#BSUB -q hpcintro
+#BSUB -n 1
+#BSUB -R "rusage[mem=2048]"
+#BSUB -W 15
+
+# define the driver name to use
+# valid values: matmult_c.studio, matmult_f.studio, matmult_c.gcc or
+# matmult_f.gcc
+#
+EXECUTABLE=matmult_c.gcc
+
+# define the mkn values in the MKN variable
+#
+SIZES="10 50 100 200 500"
+
+# define the permutation type in PERM
+#
+PERM="mkn"
+
+# uncomment and set a reasonable BLKSIZE for the blk version
+#
+# BLKSIZE=1
+
+# enable(1)/disable(0) result checking
+export MATMULT_COMPARE=1
+
+# start the collect command with the above settings
+for S in $SIZES
+do
+    ./$EXECUTABLE $PERM $S $S $S $BLKSIZE
+done
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   15.34 sec.
+    Max Memory :                                 5 MB
+    Average Memory :                             5.00 MB
+    Total Requested Memory :                     2048.00 MB
+    Delta Memory :                               2043.00 MB
+    Max Swap :                                   -
+    Max Processes :                              4
+    Max Threads :                                5
+    Run time :                                   16 sec.
+    Turnaround time :                            102 sec.
+
+The output (if any) is above this job summary.
+
