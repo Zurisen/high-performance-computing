@@ -1,6 +1,13 @@
 #!/bin/bash
 # 02614 - High-Performance Computing
 
+#BSUB -J collector
+#BSUB -o collector_%J.out
+#BSUB -q hpcintro
+#BSUB -n 1
+#BSUB -R "rusage[mem=2048]"
+#BSUB -W 15
+
 # bash file to the test performance for
 # different block sizes
 
