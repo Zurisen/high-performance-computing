@@ -1,6 +1,6 @@
 Compiler used: "matmult_c.gcc"
 Makefile used: "Makefile.gcc" --> Renamed to "Makefile"
-Optimizers used: -O0 (no optimizer), -O3, -Ofast (the Makefile is set with -O3)
+Optimizers used: -O0 (no optimizer), -O3, -Ofast (the Makefile is this directory is set to -O3)
 
 The file collect_blkblocks.sh is a modified version of 
 collect_batch.sh for looping different blocksizes in the
