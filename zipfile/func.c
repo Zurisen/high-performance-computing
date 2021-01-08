@@ -1,6 +1,5 @@
 #include <math.h>
 #include <cblas.h>
-// Have also these lib on matmult_blk. They are introduced here just in case are necessary.
 #include <stdlib.h>
 #include <stdio.h>
 
