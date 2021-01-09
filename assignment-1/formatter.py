@@ -13,13 +13,13 @@ if not os.path.exists('results_txt'):
     os.makedirs('results_txt')
 
 # read all .out files
-for outfile in glob.glob(os.path.join("results/"+'*.out') ):
+for outfile in glob.glob(os.path.join("results/" + '*.out') ):
     f = open(outfile)
-    new_file = open("results_txt/" + outfile.replace("results/", "") + ".txt", "w")
+    new_file = open("results_txt/" + outfile.replace("results/", "")+ ".txt", "w")
     print(outfile + ".txt")
 
     # we only need first 5 lines of .out file
-    Lines = f.readlines() 
+    Lines = f.readlines()
     count = 1
     for line in Lines: 
     	print(line)

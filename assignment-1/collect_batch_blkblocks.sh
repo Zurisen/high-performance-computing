@@ -17,13 +17,13 @@ OUTFILE=matmult_out.blocks.gcc.txt
 EXECUTABLE=matmult_c.gcc
 
 # define MKN sizes 
-MKN="100 100 100"
+MKN="3000 1000 2000"
 
 # set the type of permutation (blk for blocks)
 PERM="blk"
 
 # loop over the different sizes of blocks
-for bls in 1 5 10 20 25 50 100
+for bls in 100 200 300 
 do
 	BLKSIZE="${bls}"
 
@@ -31,7 +31,7 @@ do
 	# get a reasonable run time.  You can get an estimate by trying this
 	# on the command line, i.e. "MFLOPS_MAX_IT=10 ./matmult_...." for the
 	# problem size you want to analyze.
-	export MFLOPS_MAX_IT=1000
+	export MFLOPS_MAX_IT=10
 
 	printf "${MKN} ${PERM} ${BLKSIZE}" >> $OUTFILE
     MATMULT_COMPARE=0 /usr/bin/time -f'%E' ./$EXECUTABLE $PERM $MKN $BLKSIZE >> $OUTFILE 2>&1

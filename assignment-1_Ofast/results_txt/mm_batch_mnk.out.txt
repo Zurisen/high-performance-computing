@@ -1,6 +1,0 @@
-     2.344    856.657 0 # matmult_mnk
-    58.594   1441.538 0 # matmult_mnk
-   234.375   1415.617 0 # matmult_mnk
-   937.500   1210.833 0 # matmult_mnk
-  5859.375   1074.968 0 # matmult_mnk
-
