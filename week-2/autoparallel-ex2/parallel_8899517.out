@@ -1,0 +1,76 @@
+Loaded module: studio/12u6
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@n-62-21-76>
+Subject: Job 8899517: <parallel> in cluster <dcc> Done
+
+Job <parallel> was submitted from host <gbarlogin1> by user <s202464> in cluster <dcc> at Mon Jan 11 21:26:02 2021
+Job was executed on host(s) <8*n-62-21-76>, in queue <hpcintro>, as user <s202464> in cluster <dcc> at Mon Jan 11 21:26:04 2021
+</zhome/7b/f/153842> was used as the home directory.
+</zhome/7b/f/153842/high-performance-computing/week-2/autoparallel-ex2> was used as the working directory.
+Started at Mon Jan 11 21:26:04 2021
+Terminated at Mon Jan 11 21:26:04 2021
+Results reported at Mon Jan 11 21:26:04 2021
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+
+#BSUB -J parallel
+#BSUB -o parallel_%J.out
+#BSUB -q hpcintro
+#BSUB -n 8
+#BSUB -R "rusage[mem=2048]"
+#BSUB -W 15
+
+module load studio
+
+EXECUTABLE=paralelizer
+OUTFILE=outfile.txt
+rm $OUTFILE
+
+echo "CPU threads = 1" >> $OUTFILE
+start=`date +%s%N`
+OMP_NUM_THREADS=1 ./$EXECUTABLE >> $OUTFILE
+end1=`date +%s%N`
+echo "Runtime $(($end1-$start)) nsec" >> $OUTFILE
+echo "" >> $OUTFILE
+
+echo "CPU threads = 2" >> $OUTFILE
+OMP_NUM_THREADS=2 ./$EXECUTABLE >> $OUTFILE
+end2=`date +%s%N`
+echo "Runtime $(($end2-$end1)) nsec" >> $OUTFILE
+echo "" >> $OUTFILE
+
+echo "CPU threads = 4" >> $OUTFILE
+OMP_NUM_THREADS=4 ./$EXECUTABLE >> $OUTFILE
+end3=`date +%s%N`
+echo "Runtime $(($end3-$end2)) nsec" >> $OUTFILE
+echo "" >> $OUTFILE
+
+echo "CPU threads = 8" >> $OUTFILE
+OMP_NUM_THREADS=8 ./$EXECUTABLE >> $OUTFILE
+end4=`date +%s%N`
+echo "Runtime $(($end4-$end3)) nsec" >> $OUTFILE
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   0.75 sec.
+    Max Memory :                                 -
+    Average Memory :                             -
+    Total Requested Memory :                     16384.00 MB
+    Delta Memory :                               -
+    Max Swap :                                   -
+    Max Processes :                              -
+    Max Threads :                                -
+    Run time :                                   0 sec.
+    Turnaround time :                            2 sec.
+
+The output (if any) is above this job summary.
+
