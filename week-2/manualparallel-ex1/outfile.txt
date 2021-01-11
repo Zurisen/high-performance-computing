@@ -1,0 +1,15 @@
+CPU threads = 1
+pi = 3.141593
+Runtime 4254038630 nsec
+
+CPU threads = 2
+pi = 3.141593
+Runtime 2493566315 nsec
+
+CPU threads = 4
+pi = 3.141593
+Runtime 1604055403 nsec
+
+CPU threads = 8
+pi = 3.141593
+Runtime 1159744562 nsec

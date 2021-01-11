@@ -3,7 +3,7 @@
 #BSUB -J parallel
 #BSUB -o parallel_%J.out
 #BSUB -q hpcintro
-#BSUB -n 1
+#BSUB -n 8
 #BSUB -R "rusage[mem=2048]"
 #BSUB -W 15
 
@@ -11,6 +11,7 @@ module load studio
 
 EXECUTABLE=paralelizer
 OUTFILE=outfile.txt
+rm $OUTFILE
 
 echo "CPU threads = 1" >> $OUTFILE
 start=`date +%s%N`
