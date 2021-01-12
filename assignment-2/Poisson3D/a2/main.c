@@ -1,78 +1,88 @@
-#include <stdlib.h>
+/* main.c - Poisson problem in 3D
+ *
+ */
 #include <stdio.h>
-#include <time.h>
+#include <stdlib.h>
+#include "alloc3d.h"
+#include "print.h"
 
-#include "datatools.h"
+#ifdef _JACOBI
 #include "jacobi.h"
-#include "gauss.h"
+#endif
 
-void print_matrix(int n, double **Matrix)
-{
-    int j, i;
-    for (j = 0; j < n; j++)
-    {
-        for (i = 0; i < n; i++)
-        {
-            printf("%.2lf ", Matrix[i][j]);
-        }
-        printf("\n");
-    }
-}
+#ifdef _GAUSS_SEIDEL
+#include "gauss_seidel.h"
+#endif
 
-int main(int argc, char *argv[])
-{
-    int N = 1000;
-    int model = 0;
-    double threshold = 1e-3;
-    double **u, **f;
-    int num_iterations = 10000;
-    
-    if (argc == 2)
-    {
-        model = atoi(argv[1]);
+#define N_DEFAULT 100
+
+int
+main(int argc, char *argv[]) {
+
+    int 	N = N_DEFAULT;
+    int 	iter_max = 1000;
+    double	tolerance;
+    double	start_T;
+    int		output_type = 0;
+    char	*output_prefix = "poisson_res";
+    char        *output_ext    = "";
+    char	output_filename[FILENAME_MAX];
+    double 	***u = NULL;
+    double 	***f = NULL;
+
+
+    /* get the paramters from the command line */
+    N         = atoi(argv[1]);	// grid size
+    iter_max  = atoi(argv[2]);  // max. no. of iterations
+    tolerance = atof(argv[3]);  // tolerance
+    start_T   = atof(argv[4]);  // start T for all inner grid points
+    if (argc == 6) {
+	output_type = atoi(argv[5]);  // ouput type
     }
-    else if (argc == 3)
-    {
-        model = atoi(argv[1]);
-        N = atoi(argv[2]);
+
+    // allocate memory
+    if ( (u = d_malloc_3d(N, N, N)) == NULL || (f = d_malloc_3d(N, N, N)) == NULL) {
+        perror("array u: allocation failed");
+        exit(-1);
     }
-    else if (argc == 4)
-    {
-        model = atoi(argv[1]);
-        N = atoi(argv[2]);
-        num_iterations = atoi(argv[3]);
-    }
-    else if (argc == 5)
-    {
-        model = atoi(argv[1]);
-        N = atoi(argv[2]);
-        num_iterations = atoi(argv[3]);
-        threshold = atoi(argv[4]);
-    }
-    
-    u = malloc_2d(N + 2, N + 2);
-    f = malloc_2d(N + 2, N + 2);
-    if (u == NULL || f == NULL)
-    {
+    double ***temp = NULL;
+
+
         printf("Memory allocation error...\n");
         exit(EXIT_FAILURE);
+
+    /*
+     *
+     * fill in your code here 
+     *
+     *
+     */
+    jacobi(double ***f, double ***u, double ***temp, int N, int num_iterations, double error)
+
+    // dump  results if wanted 
+    switch(output_type) {
+	case 0:
+	    // no output at all
+	    break;
+	case 3:
+	    output_ext = ".bin";
+	    sprintf(output_filename, "%s_%d%s", output_prefix, N, output_ext);
+	    fprintf(stderr, "Write binary dump to %s: ", output_filename);
+	    print_binary(output_filename, N, u);
+	    break;
+	case 4:
+	    output_ext = ".vtk";
+	    sprintf(output_filename, "%s_%d%s", output_prefix, N, output_ext);
+	    fprintf(stderr, "Write VTK file to %s: ", output_filename);
+	    print_vtk(output_filename, N, u);
+	    break;
+	default:
+	    fprintf(stderr, "Non-supported output type!\n");
+	    break;
     }
-    
-    init_data(N, u, f);
-   
-    if (model == 0)
-    {
-        printf("Jacobi method \n");
-        printf("N: %d\n", N);
-        jacobi(N, num_iterations, f, u, threshold);
-    }
-    else
-    {
-        printf("Gausss method \n");
-        printf("N: %d\n", N);
-        gauss(N, num_iterations, f, u, threshold);
-    }
-    free_2d(u);
-    free_2d(f);
-    return 0;
+
+    // de-allocate memory
+    free(u);
+
+    return(0);
 }
