@@ -18,7 +18,7 @@ void jacobi(double ***f, double ***u,double ***temp, int N, int num_iterations, 
 	{
 		for (j = 0; j <= N + 1; j++)
 		{
-			for (j = 0; j <= N + 1; j++)
+			for (k = 0; j <= N + 1; j++)
 			{
 				u_prev[i][j][k] = u[i][j][k];
 			}

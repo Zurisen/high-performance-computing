@@ -57,7 +57,7 @@ main(int argc, char *argv[]) {
      *
      *
      */
-    jacobi(double ***f, double ***u, double ***temp, int N, int num_iterations, double error)
+     jacobi(f, u, temp, N, iter_max, tolerance);
 
     // dump  results if wanted 
     switch(output_type) {
@@ -83,6 +83,7 @@ main(int argc, char *argv[]) {
 
     // de-allocate memory
     free(u);
+    free(f);
 
     return(0);
 }
