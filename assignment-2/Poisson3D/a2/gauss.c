@@ -2,33 +2,31 @@
 #include <stdio.h>
 #include <math.h>
 
-void gauss(int N, int num_iterations, double **f, double **u_new, double threshold)
+void gauss(int N, int num_iterations, double **f, double **u, double conv)
 {
 
 	int i, j;
 	int k = 0;
 	double dist = 100000000000.0;
-	double u_old;
-	threshold *= threshold;
+	double u_prev;
+	error *= error;
 
-	//grid spacing: 2/(N+1) (x goes from -1 to 1)
+	
 	double delta = (2 / (N + 1)) * (2 / (N + 1));
 
-	while (dist > threshold && k < num_iterations)
+	while (dist > error && k < num_iterations)
 	{
 		dist = 0.0;
 		for (i = 1; i <= N; i++)
 		{
 			for (j = 1; j <= N; j++)
 			{
-				u_old = u_new[i][j];
-				u_new[i][j] = 0.25 * (u_new[i - 1][j] + u_new[i + 1][j] + u_new[i][j - 1] + u_new[i][j + 1] + delta * f[i][j]);
-				dist += (u_new[i][j] - u_old) * (u_new[i][j] - u_old);
+				u_prev = u[i][j];
+				u[i][j] = 0.25 * (u[i - 1][j] + u[i + 1][j] + u[i][j - 1] + u[i][j + 1] + delta * f[i][j]);
+				dist += (u[i][j] - u_prev) * (u[i][j] - u_prev);
 			}
 		}
-		//dist = (double)sqrt((double)dist);
 		k += 1;
 	}
 
-	// printf("Iterations: %d\ndistance: %.18f\n", k, dist);
 }
