@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo -n "Setting up Makefiles for Oracle Studio ..."
+ln -sf Makefile.studio Makefile
+cd pngwriter/src
+ln -sf Makefile.studio Makefile
+echo "done."
