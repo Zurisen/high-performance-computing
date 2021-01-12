@@ -5,11 +5,14 @@
 #include <stdlib.h>
 #include "alloc3d.h"
 #include "print.h"
-
+#include "func.h" /* some helper functions */
+#include <math.h> /* for pow() */
+/*
 #ifdef _JACOBI
 #include "jacobi.h"
 #endif
-
+*/
+#include "jacobi.h"
 #ifdef _GAUSS_SEIDEL
 #include "gauss_seidel.h"
 #endif
@@ -27,8 +30,11 @@ main(int argc, char *argv[]) {
     char	*output_prefix = "poisson_res";
     char        *output_ext    = "";
     char	output_filename[FILENAME_MAX];
-    double 	***uNew = NULL;
+    double 	***u = NULL;
     double  ***uOld = NULL;
+    double  ***uSwap = NULL;
+    double  ***f = NULL;
+    double gridSpace;
 
 
     /* get the parameters from the command line */
@@ -40,26 +46,34 @@ main(int argc, char *argv[]) {
 	output_type = atoi(argv[5]);  // ouput type
     }
 
+    gridSpace = 4*pow(N, -2);
+
     // allocate memory
-    if ( (uNew = d_malloc_3d(N, N, N)) == NULL ) {
+    u = d_malloc_3d(N, N, N);
+    uOld = d_malloc_3d(N, N, N);
+    uSwap = d_malloc_3d(N, N, N);
+    f = d_malloc_3d(N, N, N);
+
+    if ((u == NULL) || (uOld == NULL) || (uSwap == NULL) || (f == NULL)) {
         perror("array u: allocation failed");
         exit(-1);
     }
 
     /* fill in your code here */
 
-    /* allocate memory */
-    if ( (uOld = d_malloc_3d(N, N, N)) == NULL ) {
-        perror("array u: allocation failed");
-        exit(-1);
-    }
+    /* Initialize the 3d arrays */
+    init_3d(start_T, N, u);
+    init_3d(start_T, N, uOld);
+    init_f(N, f);
 
-    
+    /* Jacobi method */
+    jacobi(u, uOld, uSwap, f, N, iter_max, gridSpace, tolerance);
 
 
     // dump  results if wanted 
     switch(output_type) {
 	case 0:
+        printf("killing it!");
 	    // no output at all
 	    break;
 	case 3:
@@ -81,6 +95,9 @@ main(int argc, char *argv[]) {
 
     // de-allocate memory
     free(u);
+    free(uOld);
+    free(uSwap);
+    free(f);
 
     return(0);
 }

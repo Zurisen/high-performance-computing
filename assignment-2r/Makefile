@@ -1,14 +1,14 @@
 # Makefile
 #
 TARGET_J  = poisson_j		# Jacobi
-TARGET_GS = poisson_gs		# Gauss-Seidel
+# TARGET_GS = poisson_gs		# Gauss-Seidel
 
-SOURCES	= main.c print.c alloc3d.c
-OBJECTS	= print.o alloc3d.o
+SOURCES	= main.c print.c alloc3d.c func.c
+OBJECTS	= print.o alloc3d.o func.o
 MAIN_J	= main_j.o
-MAIN_GS = main_gs.o
+#MAIN_GS = main_gs.o
 OBJS_J	= $(MAIN_J) jacobi.o
-OBJS_GS	= $(MAIN_GS) gauss_seidel.o
+# OBJS_GS	= $(MAIN_GS) gauss_seidel.o
 
 # options and settings for the GCC compilers
 #
@@ -48,3 +48,4 @@ realclean: clean
 main_j.o: main.c print.h jacobi.h 
 main_gs.o: main.c print.h gauss_seidel.h
 print.o: print.h
+func.o: func.c func.h

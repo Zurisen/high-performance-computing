@@ -6,12 +6,11 @@
 #include <math.h>
 
 void
-jacobi(double*** uNew, double*** uOld, double*** f, int N, int iter_max, double* iter, double gridSpace, double tolerance) {
+jacobi(double*** uNew, double*** uOld, double*** uSwap, double*** f, int N, int iter_max, double gridSpace, double tolerance) {
     double invCube = 1/6;
-    double*** uSwap;
-    double* d=10e+5;
-    
-    for (iter = 0; (iter < iter_max || d > tolerance); iter++) {
+    double d=10e+5;
+
+    for (int iter = 0; (iter < iter_max || d > tolerance); iter++) {
     	d = 0.0;
 
     	uSwap = uNew;
@@ -34,3 +33,4 @@ jacobi(double*** uNew, double*** uOld, double*** f, int N, int iter_max, double*
     		}
     	}
 	}
+}
