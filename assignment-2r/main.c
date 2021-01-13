@@ -13,9 +13,15 @@
 #endif
 */
 #include "jacobi.h"
+
+/*
 #ifdef _GAUSS_SEIDEL
 #include "gauss_seidel.h"
 #endif
+*/
+
+#include "gauss_seidel.h"
+
 
 #define N_DEFAULT 100
 
@@ -68,6 +74,9 @@ main(int argc, char *argv[]) {
 
     /* Jacobi method */
     jacobi(u, uOld, uSwap, f, N, iter_max, gridSpace, tolerance);
+
+    /* Gauss Seidel method */
+    //gauss_seidel(u, uOld, uSwap, f, N, iter_max, gridSpace, tolerance);
 
 
     // dump  results if wanted 
