@@ -36,7 +36,6 @@ jacobi(double*** uNew, double*** uOld, double*** uSwap, double*** f, int N, int 
                 }
             }
         }
-	   printf("%i %f \n", iter, d);
 	}
 	if (iter == iter_max) {
 	   printf("Warning: Didn't converge to tolerance within the maximum number of iterations. d= %f, tol=%f \n", d, tolerance);
