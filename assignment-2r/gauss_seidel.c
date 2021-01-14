@@ -10,7 +10,7 @@ gauss_seidel(double*** uNew, double*** uOld, double*** uSwap, double*** f, int N
     double invCube = 1/6.;
     double d=100000.0;
 
-    for (int iter = 0; (iter < iter_max || d > tolerance); iter++) {
+    for (int iter = 0; (iter < iter_max && d > tolerance); iter++) {
     	d = 0.0;
 
         for (int i = 1; i < N-1; i++) {
