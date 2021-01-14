@@ -80,20 +80,18 @@ main(int argc, char *argv[]) {
     start = omp_get_wtime();
     iter = jacobi(u, uOld, uSwap, f, N, iter_max, gridSpace, tolerance);
     time = omp_get_wtime() - start;
+
+    /* Gauss Seidel method */
+    //gauss_seidel(u, uOld, uSwap, f, N, iter_max, gridSpace, tolerance);
     
     /* print stats of the run 
     N: size of grid, iter: iterations, time: (total) time, iterations/per unit time*/
     memory = 3.0*(double)(pow(N,3))*(double)(sizeof(double))*0.001; /* kBytes */
     printf("%i %i %lf %lf %g\n",N,iter,time,(double)iter/time, memory);
 
-    /* Gauss Seidel method */
-    //gauss_seidel(u, uOld, uSwap, f, N, iter_max, gridSpace, tolerance);
-
-
     // dump  results if wanted 
     switch(output_type) {
 	case 0:
-        printf("killing it!");
 	    // no output at all
 	    break;
 	case 3:
