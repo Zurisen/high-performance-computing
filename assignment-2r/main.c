@@ -52,7 +52,7 @@ main(int argc, char *argv[]) {
 	output_type = atoi(argv[5]);  // ouput type
     }
 
-    gridSpace = 4*pow(N, -2);
+    gridSpace = 4.*pow(N, -2);
 
     // allocate memory
     u = d_malloc_3d(N, N, N);
@@ -74,7 +74,15 @@ main(int argc, char *argv[]) {
 
     /* Jacobi method */
     jacobi(u, uOld, uSwap, f, N, iter_max, gridSpace, tolerance);
-
+	for (int i=0; i<N; i++){
+		printf("\n%d -th layer", i);
+		for (int j=0; j<N; j++){
+			printf("\n");
+			for(int k=0; k<N; k++){
+				printf("%f ", u[i][j][k]);
+			}
+		}
+	}
     /* Gauss Seidel method */
     //gauss_seidel(u, uOld, uSwap, f, N, iter_max, gridSpace, tolerance);
 
