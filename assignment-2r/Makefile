@@ -14,7 +14,7 @@ OBJS_GS	= $(MAIN_GS) gauss_seidel.o
 #
 CC	= suncc
 DEFS	= 
-OPT	= -g -fast
+OPT	= -g -fast -xrestrict -xautopar -xloopinfo
 IPO	= 
 ISA	= 
 CHIP	= 
