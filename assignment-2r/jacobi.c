@@ -10,7 +10,7 @@ jacobi(double*** uNew, double*** uOld, double*** uSwap, double*** f, int N, int 
     double invCube = 1/6.;
     double d=100000.0;
     int i, j, k, iter;
-   for (iter = 0; (iter < iter_max && d > tolerance); iter++) {
+   for (iter = 0; (iter < iter_max || d > tolerance); iter++) {
         d = 0.0;
         uSwap = uNew;
         uNew = uOld;
