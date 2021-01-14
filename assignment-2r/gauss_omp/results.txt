@@ -1,15 +1,1 @@
 size(N) iter time(total) iter/s memory(kBytes)
-Warning: Didn't converge to tolerance within the maximum number of iterations. d= 0.000000, tol=0.100000 
-50 0 0.111472 0.000000 3000
-Warning: Didn't converge to tolerance within the maximum number of iterations. d= 0.000000, tol=0.100000 
-75 0 0.408003 0.000000 10125
-Warning: Didn't converge to tolerance within the maximum number of iterations. d= 0.000000, tol=0.100000 
-100 0 1.018234 0.000000 24000
-Warning: Didn't converge to tolerance within the maximum number of iterations. d= 0.000000, tol=0.100000 
-125 0 2.515067 0.000000 46875
-Warning: Didn't converge to tolerance within the maximum number of iterations. d= 0.000000, tol=0.100000 
-150 0 4.670544 0.000000 81000
-Warning: Didn't converge to tolerance within the maximum number of iterations. d= 0.000000, tol=0.100000 
-175 0 7.919141 0.000000 128625
-Warning: Didn't converge to tolerance within the maximum number of iterations. d= 0.000000, tol=0.100000 
-200 0 10.170615 0.000000 192000
