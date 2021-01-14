@@ -9,8 +9,8 @@ void
 jacobi(double*** uNew, double*** uOld, double*** uSwap, double*** f, int N, int iter_max, double gridSpace, double tolerance) {
     double invCube = 1/6.;
     double d=100000.0;
-int i, j, k;
-   for (int iter = 0; (iter < iter_max || d > tolerance); iter++) {
+    int i, j, k, iter;
+   for (iter = 0; (iter < iter_max || d > tolerance); iter++) {
         d = 0.0;
         uSwap = uNew;
         uNew = uOld;
@@ -36,5 +36,9 @@ int i, j, k;
                 }
             }
         }
+	printf("%i %f \n", iter, d);
 	}
+	if (iter == iter_max) {
+	printf("Warning: Didn't converge to tolerance within the maximum number of iterations. d= %f, tol=%f \n", d, tolerance);
+}
 }
