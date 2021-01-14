@@ -14,10 +14,10 @@ void init_3d(double start_T, int N, double*** u) {
 		for (int v = 0; v < N; v++) {
 			u[0][w][v] = 20.0;
 			u[N-1][w][v] = 20.0;
-			u[w][0][v] = 0.0;
 			u[w][N-1][v] = 20.0;
 			u[w][v][0] = 20.0;
 			u[w][v][N-1] = 20.0;
+			u[w][0][v] = 0.0;
 		}
 	}
 	
