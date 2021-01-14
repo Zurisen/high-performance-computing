@@ -11,14 +11,12 @@ jacobi(double*** uNew, double*** uOld, double*** uSwap, double*** f, int N, int 
     double d=100000.0;
     int i, j, k, iter;
 
-    #pragma omp parallel shared(iter, d, uOld, uNew, uSwap) private(i, j, k) 
-    {
-        for (iter = 0; (iter < iter_max && d > tolerance); iter++) {
+        for (iter = 0; (iter < iter_max ||  d > tolerance); iter++) {
             d = 0.0;
             uSwap = uNew;
             uNew = uOld;
             uOld = uSwap;
-	       #pragma omp for
+	   #pragma omp parallel for
     	   for (i = 1; i < N-1; i++) {
     		  for (j = 1; j < N-1; j++) {
     		  	   for (k = 1; k < N-1; k++) {
@@ -29,7 +27,7 @@ jacobi(double*** uNew, double*** uOld, double*** uSwap, double*** f, int N, int 
                     }
                 }
             }
-            #pragma omp single
+           
             for (i = 1; i < N-1; i++) {
                 for (j = 1; j < N-1; j++) {
                     for (k = 1; k < N-1; k++) {
@@ -40,9 +38,5 @@ jacobi(double*** uNew, double*** uOld, double*** uSwap, double*** f, int N, int 
                 }
             }
 	   }
-    } // End of parallel region
-	if (iter == iter_max) {
-	   printf("Warning: Didn't converge to tolerance within the maximum number of iterations. d= %f, tol=%f \n", d, tolerance);
-    }
     return iter;
 }
