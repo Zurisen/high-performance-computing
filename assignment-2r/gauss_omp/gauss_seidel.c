@@ -6,44 +6,55 @@
 #include <math.h>
 
 int
-gauss_seidel(double*** uNew, double*** uOld, double*** uSwap, double*** f, int N, int iter_max, double gridSpace, double tolerance) {
+gauss_seidel(double*** uNew, double*** p, double*** uSwap, double*** f, int N, int iter_max, double gridSpace, double tolerance) {
     double invCube = 1/6.;
     double d=100000.0;
     int i, j, k, iter;
 
-    #pragma omp parallel shared(iter, d, uOld, uNew, uSwap) private(i, j, k)
-    {
-        for (iter = 0; (iter < iter_max || d > tolerance); iter++) {
-    	   d = 0.0;
+    for (iter = 0; (iter < iter_max); iter++) {
+    	d = 0.0;
 
-            uSwap = uNew;
-            uNew = uOld;
-            uOld = uSwap;
-            #pragma omp for
-            for (i = 1; i < N-1; i++) {
-                for (j = 1; j < N-1; j++) {
-                    for (k = 1; k < N-1; k++) {
+        uSwap = uNew;
+        uNew = p;
+        p = uSwap;
 
-    				    /* Compute update of uNew */
-    				    uNew[i][j][k] = invCube*(uNew[i-1][j][k] + uOld[i+1][j][k] 
-    					   + uNew[i][j-1][k] + uOld[i][j+1][k] + uNew[i][j][k-1] + uOld[i][j][k+1] + gridSpace*f[i][j][k]);
-        			}
-        		}
+        #pragma omp parallel
+        {
+        #pragma omp for schedule(static,1)  ordered(2) private(j,k)
+        for (i = 1; i < N-1; ++i) {
+            for (j = 1; j < N-1; ++j) {
+        #pragma omp ordered depend(sink: i-1,j-1) depend(sink: i-1,j) \
+                            depend(sink: i-1,j+1) depend(sink: i,j-1)
+                for (k = 1; k < N-1; ++k) {
+                    double tmp1 = (p[i-1][j-1][k-1] + p[i-1][j-1][k] + p[i-1][j-1][k+1] 
+                                + p[i-1][j][k-1] + p[i-1][j][k] + p[i-1][j][k+1]
+                                + p[i-1][j+1][k-1] + p[i-1][j+1][k] + p[i-1][j+1][k+1]);
+                    double tmp2 = (p[i][j-1][k-1] + p[i][j-1][k] + p[i][j-1][k+1]
+                                + p[i][j][k-1] + p[i][j][k] + p[i][j][k+1]
+                                + p[i][j+1][k-1] + p[i][j+1][k] + p[i][j+1][k+1]);
+                    double tmp3 = (p[i+1][j-1][k-1] + p[i+1][j-1][k] + p[i+1][j-1][k+1]
+                                + p[i+1][j][k-1] + p[i+1][j][k] + p[i+1][j][k+1]
+                                + p[i+1][j+1][k-1] + p[i+1][j+1][k] + p[i+1][j+1][k+1]);
+
+                    uNew[i][j][k] = (tmp1 + tmp2 + tmp3) / 27.0;
+                    //printf("%3.4f  ", uNew[i][j][k]);
+                }
+                //printf("\n");
+        #pragma omp ordered depend(source)
             }
-            #pragma omp single nowait
-            for (i = 1; i < N-1; i++) {
-                for (j = 1; j < N-1; j++) {
-                    for (k = 1; k < N-1; k++) {
+        }
+        #pragma omp for schedule(dynamic)
+        for (i = 1; i < N-1; i++) {
+            for (j = 1; j < N-1; j++) {
+                for (k = 1; k < N-1; k++) {
 
-                        /* Compute new d */
-                        d += abs(uNew[i][j][k] - uOld[i][j][k]);
-                    }
+                    /* Compute new d */
+                    d += abs(uNew[i][j][k] - p[i][j][k]);
                 }
             }
         }
-    } // End of parallel region
-    if (iter == iter_max) {
-       printf("Warning: Didn't converge to tolerance within the maximum number of iterations. d= %f, tol=%f \n", d, tolerance);
-    }
-    return iter;
+        //printf("distance : %8.8f", d);printf("\n");
+        }
+	}
 }
+

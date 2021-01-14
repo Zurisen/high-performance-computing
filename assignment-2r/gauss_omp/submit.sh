@@ -18,6 +18,6 @@ rm $OUTFILE
 echo "size(N) iter time(total) iter/s memory(kBytes)" >> $OUTFILE
 for i in 50 75 100 125 150 175 200 
 do
-	./$EXECUTABLE_GS $i $MAX_ITER $TOLERANCE $TEMPERATURE $OUTPUT_TYPE >> $OUTFILE
+	./$EXECUTABLE_J $i $MAX_ITER $TOLERANCE $TEMPERATURE $OUTPUT_TYPE >> $OUTFILE
 done
 
