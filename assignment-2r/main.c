@@ -73,7 +73,7 @@ main(int argc, char *argv[]) {
     init_f(N, f);
 
     /* Jacobi method */
-    //jacobi(u, uOld, uSwap, f, N, iter_max, gridSpace, tolerance);
+    jacobi(u, uOld, uSwap, f, N, iter_max, gridSpace, tolerance);
 
 	/* Printing final u matrix
 	for (int i=0; i<N; i++){
@@ -88,7 +88,7 @@ main(int argc, char *argv[]) {
 	*/
 
     /* Gauss Seidel method */
-    gauss_seidel(u, uOld, uSwap, f, N, iter_max, gridSpace, tolerance);
+    //gauss_seidel(u, uOld, uSwap, f, N, iter_max, gridSpace, tolerance);
 
 
     // dump  results if wanted 
