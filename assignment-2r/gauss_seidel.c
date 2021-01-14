@@ -11,7 +11,7 @@ gauss_seidel(double*** uNew, double*** uOld, double*** uSwap, double*** f, int N
     double d=100000.0;
     int i, j, k, iter;
 
-    for (iter = 0; (iter < iter_max && d > tolerance); iter++) {
+    for (iter = 0; (iter < iter_max || d > tolerance); iter++) {
     	d = 0.0;
 
         uSwap = uNew;
