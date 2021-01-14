@@ -4,7 +4,7 @@
 #BSUB -q hpcintro
 #BSUB -n 1
 #BSUB -R "rusage[mem=2048]"
-#BSUB -W 15
+#BSUB -W 45
 
 EXECUTABLE=poisson_j
 HWCOUNT="-h dch,on,dcm,on,l2h,on,l2m,on"
@@ -17,7 +17,7 @@ module load studio
 
 
 
-for i in 50 80 100 150 200
+for i in 20 50 80 100
 do
 
 	for iter in 10 50 100 500 1000 5000 10000
