@@ -1,0 +1,66 @@
+/zhome/fe/3/153614/.lsbatch/1610658114.9098927.shell: line 24: syntax error near unexpected token `$NUM_THREADS'
+/zhome/fe/3/153614/.lsbatch/1610658114.9098927.shell: line 24: `		printf($NUM_THREADS)'
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@n-62-21-76>
+Subject: Job 9098927: <mm_batch> in cluster <dcc> Exited
+
+Job <mm_batch> was submitted from host <gbarlogin1> by user <s202489> in cluster <dcc> at Thu Jan 14 22:01:54 2021
+Job was executed on host(s) <8*n-62-21-76>, in queue <hpcintro>, as user <s202489> in cluster <dcc> at Thu Jan 14 22:01:55 2021
+</zhome/fe/3/153614> was used as the home directory.
+</zhome/fe/3/153614/high-performance-computing/assignment-2r/jacobi_omp> was used as the working directory.
+Started at Thu Jan 14 22:01:55 2021
+Terminated at Thu Jan 14 22:01:56 2021
+Results reported at Thu Jan 14 22:01:56 2021
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+#BSUB -J mm_batch
+#BSUB -o mm_batch_%J.out
+#BSUB -q hpcintro
+#BSUB -n 8
+#BSUB -R "rusage[mem=2048]"
+#BSUB -W 15
+
+EXECUTABLE_J=poisson_j
+EXECUTABLE_GS=poisson_gs
+MAX_ITER=1000
+TOLERANCE=0.1
+TEMPERATURE=10.0
+OUTPUT_TYPE=4
+OUTFILE="results.txt"
+rm $OUTFILE
+
+echo "size(N) iter time(total) iter/s memory(kBytes)" >> $OUTFILE
+for i in 50 75 100 125 150 175 200 
+do
+	for NUM_THREADS in 1 2 4 8
+	do
+		OMP_NUM_THREADS=$NUM_THREADS ./$EXECUTABLE_J $i $MAX_ITER $TOLERANCE $TEMPERATURE $OUTPUT_TYPE >> $OUTFILE
+		printf($NUM_THREADS)
+	done
+done
+
+
+------------------------------------------------------------
+
+Exited with exit code 2.
+
+Resource usage summary:
+
+    CPU time :                                   0.24 sec.
+    Max Memory :                                 -
+    Average Memory :                             -
+    Total Requested Memory :                     16384.00 MB
+    Delta Memory :                               -
+    Max Swap :                                   -
+    Max Processes :                              -
+    Max Threads :                                -
+    Run time :                                   1 sec.
+    Turnaround time :                            2 sec.
+
+The output (if any) is above this job summary.
+

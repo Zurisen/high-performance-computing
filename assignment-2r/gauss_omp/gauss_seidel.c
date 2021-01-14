@@ -56,5 +56,6 @@ gauss_seidel(double*** uNew, double*** p, double*** uSwap, double*** f, int N, i
         //printf("distance : %8.8f", d);printf("\n");
         }
 	}
+return iter;
 }
 
