@@ -12,7 +12,7 @@
 #include "jacobi.h"
 #endif
 */
-#include "jacobi.h"
+/* #include "jacobi.h" */
 
 /*
 #ifdef _GAUSS_SEIDEL
@@ -20,7 +20,7 @@
 #endif
 */
 
-/* #include "gauss_seidel.h" */
+#include "gauss_seidel.h"
 #include <omp.h>
 
 
@@ -76,13 +76,16 @@ main(int argc, char *argv[]) {
     init_3d(start_T, N, uOld);
     init_f(N, f);
 
-    /* Jacobi method */
+    /* Jacobi method 
     start = omp_get_wtime();
     iter = jacobi(u, uOld, uSwap, f, N, iter_max, gridSpace, tolerance);
     time = omp_get_wtime() - start;
+    */
 
     /* Gauss Seidel method */
-    //gauss_seidel(u, uOld, uSwap, f, N, iter_max, gridSpace, tolerance);
+    start = omp_get_wtime();
+    gauss_seidel(u, uOld, uSwap, f, N, iter_max, gridSpace, tolerance);
+    time = omp_get_wtime() - start;
     
     /* print stats of the run 
     N: size of grid, iter: iterations, time: (total) time, iterations/per unit time*/
