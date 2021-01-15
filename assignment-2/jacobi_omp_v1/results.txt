@@ -1,4 +1,4 @@
-size(N) iter time(total) iter/s memory(kBytes)
+size(N) iter time(total) iter/s memory(kBytes) mlups
 50 1000 0.362698 2757.114140 3000 1033.92
 50 1000 0.330141 3029.012573 3000 1135.88
 50 1000 0.245232 4077.777432 3000 1529.17
