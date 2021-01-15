@@ -12,7 +12,7 @@ jacobi(double*** uNew, double*** uOld, double*** uSwap, double*** f, int N, int 
     int i, j, k, iter=0;
 	#pragma omp parallel shared(uNew, uOld, uSwap, f, N, gridSpace, tolerance, iter) firstprivate(iter_max)
 	{ 	
-	while (iter < iter_max && d > tolerance){
+	while (iter < iter_max || d > tolerance){
           #pragma omp single
           {
 	    d = 0.0;
@@ -28,7 +28,7 @@ jacobi(double*** uNew, double*** uOld, double*** uSwap, double*** f, int N, int 
     				    /* Compute update of uNew */
     				    uNew[i][j][k] = invCube*(uOld[i-1][j][k] + uOld[i+1][j][k] 
     					   + uOld[i][j-1][k] + uOld[i][j+1][k] + uOld[i][j][k-1] + uOld[i][j][k+1] + gridSpace*f[i][j][k]);
-				    d += (uOld[i][j][k]-uNew[i][j][k])*(uOld[i][j][k]-uNew[i][j][k]);
+				    d += abs(uNew[i][j][k] - uOld[i][j][k]);
                     }
                 }
             }
