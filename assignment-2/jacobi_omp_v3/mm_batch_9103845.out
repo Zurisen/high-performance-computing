@@ -1,0 +1,68 @@
+Loaded module: studio/12u6
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@n-62-21-75>
+Subject: Job 9103845: <mm_batch> in cluster <dcc> Done
+
+Job <mm_batch> was submitted from host <gbarlogin1> by user <s202464> in cluster <dcc> at Fri Jan 15 13:05:25 2021
+Job was executed on host(s) <16*n-62-21-75>, in queue <hpcintro>, as user <s202464> in cluster <dcc> at Fri Jan 15 13:05:26 2021
+</zhome/7b/f/153842> was used as the home directory.
+</zhome/7b/f/153842/high-performance-computing/assignment-2/jacobi_omp_carlos> was used as the working directory.
+Started at Fri Jan 15 13:05:26 2021
+Terminated at Fri Jan 15 13:06:14 2021
+Results reported at Fri Jan 15 13:06:14 2021
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+#BSUB -J mm_batch
+#BSUB -o mm_batch_%J.out
+#BSUB -q hpcintro
+#BSUB -n 16
+#BSUB -R "rusage[mem=2048]"
+#BSUB -W 45
+
+EXECUTABLE_J=poisson_j
+EXECUTABLE_GS=poisson_gs
+MAX_ITER=1000
+TOLERANCE=0.1
+TEMPERATURE=10.0
+OUTPUT_TYPE=4
+OUTFILE="results.txt"
+rm $OUTFILE
+
+module load studio
+
+echo "size(N) iter time(total) iter/s memory(kBytes)" >> $OUTFILE
+
+
+for i in 50 75 100 150 
+do
+	for j in 1 2 4 8 16
+	do
+	OMP_NUM_THREADS=$j ./$EXECUTABLE_J $i $MAX_ITER $TOLERANCE $TEMPERATURE $OUTPUT_TYPE >> $OUTFILE
+	done
+done
+
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   118.71 sec.
+    Max Memory :                                 83 MB
+    Average Memory :                             64.00 MB
+    Total Requested Memory :                     32768.00 MB
+    Delta Memory :                               32685.00 MB
+    Max Swap :                                   -
+    Max Processes :                              4
+    Max Threads :                                6
+    Run time :                                   48 sec.
+    Turnaround time :                            49 sec.
+
+The output (if any) is above this job summary.
+
