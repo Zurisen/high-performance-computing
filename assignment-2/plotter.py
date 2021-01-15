@@ -31,33 +31,9 @@ data.columns = ["size_N", "iterations", "time", "iters_per_second", "memory", "m
 distinct_sizes_N = data.size_N.unique()
 
 # create column of num_threads
-num_threads_col = [1, 2, 4, 8, 16]*len(distinct_sizes_N)
-data.num_threads = num_threads_col
+num_threads = [1, 2, 4, 8, 16]*len(distinct_sizes_N)
+data["num_threads"] = num_threads
 distinct_num_threads = [1, 2, 4, 8, 16]
-
-# create speedup column
-# NOTE: there is definetly a better way to do this
-T_1 = data[data.num_threads == 1].time
-speedup = []
-for idx, thread in enumerate(data.num_threads):
-	if thread == 1:
-		speedup.append(data.time[idx] / T_1[0])
-	elif thread == 2:
-		speedup.append(data.time[idx] / T_1[1])
-	elif thread == 4:
-		speedup.append(data.time[idx] / T_1[2])
-	elif thread == 8:
-		speedup.append(data.time[idx] / T_1[3])
-	elif thread == 16:
-		speedup.append(data.time[idx] / T_1[4])
-	else:
-		print("Error: num threads not valid. Num_threads=", data.num_threads)
-		exit()
-
-data.speedup = speedup
-print(data.speedup)
-
-
 
 
 print(data)
@@ -153,6 +129,7 @@ ax.legend()
 plt.xlabel("Memory footprint (kBytes)")
 plt.ylabel("MLUPS")
 fig.savefig(parent_folder +'/plots' +'/mlupsVSmemory.png')
+
 
 print("Success!. Images saved at", parent_folder +'/plots')
 exit()
