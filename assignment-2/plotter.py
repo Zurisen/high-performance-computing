@@ -25,81 +25,135 @@ parent_folder = str(sys.argv[1]).split("/")[0]
 if not os.path.exists(parent_folder +'/plots'):
     os.makedirs(parent_folder +'/plots')
 
-data.columns = ["size_N", "iterations", "time", "iters_per_second", "memory", "num_threads"]
+data.columns = ["size_N", "iterations", "time", "iters_per_second", "memory", "mlups"]
 
-distinct_num_threads = data.num_threads.unique()
 
+distinct_sizes_N = data.size_N.unique()
+
+# create column of num_threads
+num_threads_col = [1, 2, 4, 8, 16]*len(distinct_sizes_N)
+data.num_threads = num_threads_col
+distinct_num_threads = [1, 2, 4, 8, 16]
+
+# create speedup column
+# NOTE: there is definetly a better way to do this
+T_1 = data[data.num_threads == 1].time
+speedup = []
+for idx, thread in enumerate(data.num_threads):
+	if thread == 1:
+		speedup.append(data.time[idx] / T_1[0])
+	elif thread == 2:
+		speedup.append(data.time[idx] / T_1[1])
+	elif thread == 4:
+		speedup.append(data.time[idx] / T_1[2])
+	elif thread == 8:
+		speedup.append(data.time[idx] / T_1[3])
+	elif thread == 16:
+		speedup.append(data.time[idx] / T_1[4])
+	else:
+		print("Error: num threads not valid. Num_threads=", data.num_threads)
+		exit()
+
+data.speedup = speedup
+print(data.speedup)
+
+
+
+
+print(data)
+
+
+# total time vs matrix size N
 fig = plt.figure()
 ax = plt.subplot(111)
 for num_threads in distinct_num_threads:
 	size_N = data[data.num_threads == num_threads].size_N
 	time = data[data.num_threads == num_threads].time
-
-	ax.plot(size_N, time, label=f'{num_threads} threads')
-	# plt.title(' ')
+	ax.plot(size_N, time, label=f'{num_threads} threads', marker="o")
 
 ax.legend()
 plt.xlabel("size N")
 plt.ylabel("time (s)")
 fig.savefig(parent_folder +'/plots' +'/timeVSsizeN.png')
 
-
+# iters per second vs matrix size N
 fig = plt.figure()
 ax = plt.subplot(111)
 for num_threads in distinct_num_threads:
 	size_N = data[data.num_threads == num_threads].size_N
 	iters_per_second = data[data.num_threads == num_threads].iters_per_second
-
-	ax.plot(size_N, iters_per_second, label=f'{num_threads} threads')
-	# plt.title(' ')
+	ax.plot(size_N, iters_per_second, label=f'{num_threads} threads', marker="o")
 
 ax.legend()
 plt.xlabel("size N")
 plt.ylabel("iters/sec")
 fig.savefig(parent_folder +'/plots'+'/itersVSsizeN.png')
 
+# memory footprint vs matriz size N
 fig = plt.figure()
 ax = plt.subplot(111)
 for num_threads in distinct_num_threads:
 	size_N = data[data.num_threads == num_threads].size_N
 	memory = data[data.num_threads == num_threads].memory
-
-	ax.plot(size_N, memory, label=f'{num_threads} threads')
-	# plt.title(' ')
+	ax.plot(size_N, memory, label=f'{num_threads} threads', marker="o")
 
 ax.legend()
 plt.xlabel("size N")
 plt.ylabel("Memory footprint (kBytes)")
 fig.savefig(parent_folder +'/plots'+'/memoryVSsizeN.png')
 
+# mlups vs matrix size N
+fig = plt.figure()
+ax = plt.subplot(111)
+for num_threads in distinct_num_threads:
+	size_N = data[data.num_threads == num_threads].size_N
+	mlups = data[data.num_threads == num_threads].mlups
+	ax.plot(size_N, mlups, label=f'{num_threads} threads', marker="o")
 
+ax.legend()
+plt.xlabel("size N")
+plt.ylabel("MLUPS")
+fig.savefig(parent_folder +'/plots' +'/mlupsVSsizeN.png')
+
+# total time vs Memory footprint
 fig = plt.figure()
 ax = plt.subplot(111)
 for num_threads in distinct_num_threads:
 	time = data[data.num_threads == num_threads].time
 	memory = data[data.num_threads == num_threads].memory
-
-	ax.plot(memory, time, label=f'{num_threads} threads')
-	# plt.title(' ')
+	ax.plot(memory, time, label=f'{num_threads} threads', marker="o")
 
 ax.legend()
 plt.xlabel("Memory footprint (kBytes)")
 plt.ylabel("time (s)")
 fig.savefig(parent_folder +'/plots'+'/timeVSmemory.png')
 
+# total num iters vs memory footprint
 fig = plt.figure()
 ax = plt.subplot(111)
 for num_threads in distinct_num_threads:
 	iters = data[data.num_threads == num_threads].iters_per_second
 	memory = data[data.num_threads == num_threads].memory
-
-	ax.plot(memory, iters, label=f'{num_threads} threads')
-	# plt.title(' ')
+	ax.plot(memory, iters, label=f'{num_threads} threads', marker="o")
 
 ax.legend()
 plt.xlabel("Memory footprint (kBytes)")
 plt.ylabel("iters/sec")
 fig.savefig(parent_folder +'/plots'+'/itersVSmemory.png')
 
+# mlups vs memory footprint
+fig = plt.figure()
+ax = plt.subplot(111)
+for num_threads in distinct_num_threads:
+	memory = data[data.num_threads == num_threads].memory
+	mlups = data[data.num_threads == num_threads].mlups
+	ax.plot(memory, mlups, label=f'{num_threads} threads', marker="o")
+
+ax.legend()
+plt.xlabel("Memory footprint (kBytes)")
+plt.ylabel("MLUPS")
+fig.savefig(parent_folder +'/plots' +'/mlupsVSmemory.png')
+
 print("Success!. Images saved at", parent_folder +'/plots')
 exit()
+
