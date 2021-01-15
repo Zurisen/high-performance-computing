@@ -46,6 +46,8 @@ main(int argc, char *argv[]) {
     double start, time; /* for timing omp */
     int iter;
     double memory; /* memory footprint */
+    double mlups; /* million lattice updates per second */
+
 
     /* get the parameters from the command line */
     N         = atoi(argv[1]);	// grid size
@@ -87,7 +89,8 @@ main(int argc, char *argv[]) {
     /* print stats of the run 
     N: size of grid, iter: iterations, time: (total) time, iterations/per unit time*/
     memory = 3.0*(double)(pow(N,3))*(double)(sizeof(double))*0.001; /* kBytes */
-    printf("%i %i %lf %lf %g\n",N,iter,time,(double)iter/time, memory);
+    mlups = 3.0*(double)(pow(N,3))*(double)iter*0.000001/(double)time;
+    printf("%i %i %lf %lf %g %g\n",N,iter,time,(double)iter/time, memory, mlups);
 
     // dump  results if wanted 
     switch(output_type) {
