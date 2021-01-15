@@ -7,6 +7,7 @@
 #include "print.h"
 #include "func.h" /* some helper functions */
 #include <math.h> /* for pow() */
+#include <omp.h>
 /*
 #ifdef _JACOBI
 #include "jacobi.h"
@@ -41,7 +42,9 @@ main(int argc, char *argv[]) {
     double  ***uSwap = NULL;
     double  ***f = NULL;
     double gridSpace;
-
+    double start, time; /* for timing omp */
+    int iter;
+    double memory; /* memory footprint */
 
     /* get the parameters from the command line */
     N         = atoi(argv[1]);	// grid size
@@ -88,9 +91,12 @@ main(int argc, char *argv[]) {
 	*/
 
     /* Gauss Seidel method */
-    gauss_seidel(u, uOld, uSwap, f, N, iter_max, gridSpace, tolerance);
+    start = omp_get_wtime();
+    iter =  gauss_seidel(u, uOld, uSwap, f, N, iter_max, gridSpace, tolerance);
+    time = omp_get_wtime() - start;
 
-
+    memory = 3.0*(double)(pow(N,3))*(double)(sizeof(double))*0.001; /* kBytes */
+    printf("%i %i %lf %lf %g\n",N,iter,time,(double)iter/time, memory);
     // dump  results if wanted 
     switch(output_type) {
 	case 0:
