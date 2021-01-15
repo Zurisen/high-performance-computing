@@ -14,7 +14,7 @@ jacobi(double*** uNew, double*** uOld, double*** uSwap, double*** f, int N, int 
 	{ 	
 	while (iter < iter_max && d>tolerance){
 	#pragma omp barrier
-	#pragma omp critical
+	#pragma omp master
           {
 	    d = 0.0;
             uSwap=uOld;
