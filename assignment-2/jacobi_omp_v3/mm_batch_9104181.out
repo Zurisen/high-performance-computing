@@ -1,16 +1,16 @@
 Loaded module: studio/12u6
 
 ------------------------------------------------------------
-Sender: LSF System <lsfadmin@n-62-21-93>
-Subject: Job 9103936: <mm_batch> in cluster <dcc> Exited
+Sender: LSF System <lsfadmin@n-62-21-96>
+Subject: Job 9104181: <mm_batch> in cluster <dcc> Done
 
-Job <mm_batch> was submitted from host <gbarlogin1> by user <s202464> in cluster <dcc> at Fri Jan 15 13:39:35 2021
-Job was executed on host(s) <16*n-62-21-93>, in queue <hpcintro>, as user <s202464> in cluster <dcc> at Fri Jan 15 13:39:37 2021
+Job <mm_batch> was submitted from host <gbarlogin1> by user <s202464> in cluster <dcc> at Fri Jan 15 14:33:19 2021
+Job was executed on host(s) <16*n-62-21-96>, in queue <hpcintro>, as user <s202464> in cluster <dcc> at Fri Jan 15 14:33:20 2021
 </zhome/7b/f/153842> was used as the home directory.
-</zhome/7b/f/153842/high-performance-computing/assignment-2/jacobi_omp_carlos> was used as the working directory.
-Started at Fri Jan 15 13:39:37 2021
-Terminated at Fri Jan 15 13:43:34 2021
-Results reported at Fri Jan 15 13:43:34 2021
+</zhome/7b/f/153842/high-performance-computing/assignment-2/jacobi_omp_v3> was used as the working directory.
+Started at Fri Jan 15 14:33:20 2021
+Terminated at Fri Jan 15 14:38:41 2021
+Results reported at Fri Jan 15 14:38:41 2021
 
 Your job looked like:
 
@@ -26,7 +26,7 @@ Your job looked like:
 
 EXECUTABLE_J=poisson_j
 EXECUTABLE_GS=poisson_gs
-MAX_ITER=1000
+MAX_ITER=50000
 TOLERANCE=0.1
 TEMPERATURE=10.0
 OUTPUT_TYPE=4
@@ -49,21 +49,20 @@ done
 
 ------------------------------------------------------------
 
-TERM_OWNER: job killed by owner.
-Exited with exit code 130.
+Successfully completed.
 
 Resource usage summary:
 
-    CPU time :                                   4.62 sec.
-    Max Memory :                                 7 MB
-    Average Memory :                             7.00 MB
+    CPU time :                                   815.62 sec.
+    Max Memory :                                 82 MB
+    Average Memory :                             67.80 MB
     Total Requested Memory :                     32768.00 MB
-    Delta Memory :                               32761.00 MB
+    Delta Memory :                               32686.00 MB
     Max Swap :                                   -
     Max Processes :                              4
-    Max Threads :                                6
-    Run time :                                   237 sec.
-    Turnaround time :                            239 sec.
+    Max Threads :                                20
+    Run time :                                   389 sec.
+    Turnaround time :                            322 sec.
 
 The output (if any) is above this job summary.
 

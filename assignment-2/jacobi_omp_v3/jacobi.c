@@ -33,7 +33,7 @@ jacobi(double*** uNew, double*** uOld, double*** uSwap, double*** f, int N, int 
 		    }
                 }
             }
-	  #pragma omp single
+	  #pragma omp master
 	  {
 	    iter++;
 	    //printf("%i\n",d);	
