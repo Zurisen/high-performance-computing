@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-void
+int
 jacobi(double*** uNew, double*** uOld, double*** uSwap, double*** f, int N, int iter_max, double gridSpace, double tolerance) {
     double invCube = 1/6.;
     double d=100000.0;
@@ -28,4 +28,5 @@ jacobi(double*** uNew, double*** uOld, double*** uSwap, double*** f, int N, int 
     		}
     	}
 	}
+	return iter;
 }

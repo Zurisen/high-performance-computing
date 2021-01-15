@@ -14,7 +14,7 @@ OBJS_J	= $(MAIN_J) jacobi.o
 #
 CC	= suncc
 DEFS	= 
-OPT	= -g -fast 
+OPT	= -g -fast -xrestrict -xopenmp -xloopinfo 
 IPO	= 
 ISA	= 
 CHIP	= 
