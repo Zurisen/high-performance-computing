@@ -65,8 +65,9 @@ data["speedup"] = speedup
 # compute mlups
 mlups = []
 memories = data.memory.to_numpy()
+iters = data.iterations.to_numpy()
 for idx, memory in enumerate(memories):
-	mlups.append(memory/(8*1000*times_vect[idx]))
+	mlups.append(memory*iters[idx]/(8*1000*times_vect[idx]))
 data["mlups"] = mlups
 
 # print(data)
