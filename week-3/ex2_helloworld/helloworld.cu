@@ -1,5 +1,6 @@
 #include <omp.h>
 #include <stdio.h>
+#include <helper_cuda.h>
 
 const int device = 0;
 
@@ -13,35 +14,45 @@ int block_i = blockIdx.x;
 int glo_thread_i = blockDim.x * blockIdx.x + threadIdx.x;
 int glo_thread_i_max = gridDim.x * blockDim.x;
 
+// force segmentation fault in block
+//if (glo_thread_i == 100){
+//    int *a = (int*) 0x10000; *a = 0;
+//}
+//
     printf("Hello world! I'm thread %i out of %i in block %i. My global thread id is %i out of %i.\n", thread_i,thread_max,block_i,glo_thread_i,glo_thread_i_max);
 }
 
+int main(int argc, char* argv[]){
 
-int main(int argc, char *argv[]) {
-    // Wake up GPU from power save state.
-    printf("Warming up device %i ... ", device); fflush(stdout);
-    double time = omp_get_wtime();
-    cudaSetDevice(device);           // Set the device to 0 or 1.
-    double *dummy_d;
-    cudaMalloc((void**)&dummy_d, 0); // We force the creation of context on the
-    // device by allocating a dummy variable.
-        printf("time = %3.2f seconds\n", omp_get_wtime() - time);
+// wake up GPU
 
-    // program 
-    int n_blk, n_threads;
+//printf("Warming up device %i ...", device);
 
-    if (argc == 3 ) {
-        n_blk = atoi(argv[1]);
-        n_threads = atoi(argv[2]);
+double time = omp_get_wtime();
+cudaSetDevice(device);
+
+double* dummy_d;
+cudaMalloc((void**)&dummy_d,0); //Force allocation for waking up gpu
+//printf("Wake up time = %3.2f seconds\n", omp_get_wtime()-time);
+
+int n_blk, n_threads;
+
+if (argc == 3 ) {
+    n_blk = atoi(argv[1]);
+    n_threads = atoi(argv[2]);
     }
-    else {
-        // use default N
-        n_blk = 1;
-        n_threads = 32;
+else {
+    // use default N
+    n_blk = 8;
+    n_threads = 16;
     }
 
-    printf("n_blk  %i ; n_threads %i\n",n_blk, n_threads);
+//printf("n_blk  %i ; n_threads %i\n",n_blk, n_threads);
 
-    my_kernel<<<n_blk,n_threads>>>();
-    cudaDeviceSynchronize();
+my_kernel<<<n_blk,n_threads>>>();
+cudaDeviceSynchronize();
 }
+
+
+
+
