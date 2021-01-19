@@ -8,11 +8,11 @@
 const int device0 = 0;
 
 // gpu (device) matrix * vector function
-void __global__ matvec(double *y, double *A, double *x, int M, int N) {
+__global__ void matvec(double *y, double *A, double *x, int M, int N) {
         
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
-    
+    printf("hello world");    
     if (i < M && j < N) atomicAdd(&y[i], A[i * N + j] * x[j]);
 }
 
@@ -61,8 +61,8 @@ int main(int argc, char *argv[]) {
 
     printf("Copying data from host to device...\n");
     // Copy data from host to device 0
-    cudaMemcpy(d0_b, h_b, size_b, cudaMemcpyHostToDevice);
-    cudaMemcpy(d0_A, h_A, size_A, cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(d0_b, h_b, size_b, cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(d0_A, h_A, size_A, cudaMemcpyHostToDevice);
 
     // Invoke Kernel 
     cudaEvent_t start, stop;
@@ -89,8 +89,8 @@ int main(int argc, char *argv[]) {
     //cudaSetDevice(device0);
     cudaMemcpy(h_C, d0_C, size_C, cudaMemcpyDeviceToHost);
 
-    //print 4 first terms of the result
-    //printf("\n%3.2f\t\n%3.2f\t\n%3.2f\t\n%3.2f\n", h_C[0], h_C[1], h_C[2], h_C[3]);    
+    //print first terms of the result
+    printf("\n%3.2f\t\n%3.2f\t\n%3.2f\t\n%3.2f\n%3.2f\t\n%3.2f\t\n%3.2f\t\n%3.2f\n", h_C[0], h_C[1], h_C[2], h_C[3], h_C[4], h_C[5], h_C[6], h_C[7]);    
     
     // Free memory
     printf("Liberating memory allocation...\n");

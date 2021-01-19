@@ -1,7 +1,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <omp.h>
+
+#define BLOCK_SIZE 16
 
 // set multiple GPU devices for computing operation
 const int device0 = 0;
@@ -38,79 +39,96 @@ int main(int argc, char *argv[]) {
     }
 
     //// Memory allocation 
-    double *d0_A, *d0_b, *d0_C, *d1_A, *d1_b, *d1_C;
+    double *d0_A, *d0_b, *d0_C,*d1_A, *d1_b, *d1_C;
     double *h_A, *h_b, *h_C;
     int size_A = sizeof(double)*N*M, size_b = sizeof(double)*N, size_C = sizeof(double)*M;
-    
-    printf("Allocating device memory...\n");
+
+    printf("Allocating device 0 memory...\n");
     // Allocate A, b and C in Device 0
     cudaSetDevice(0);
     cudaMalloc((void**)&d0_A, size_A/2);
     cudaMalloc((void**)&d0_C, size_C/2);
-    cudaMalloc((void**)&d0_b, size_b);    
+    cudaMalloc((void**)&d0_b, size_b); 
+    
+    printf("Allocating device 1 memory...\n");
     // Allocate A, b and C in Device 1
     cudaSetDevice(1);
     cudaMalloc((void**)&d1_A, size_A/2);
     cudaMalloc((void**)&d1_C, size_C/2);
-    cudaMalloc((void**)&d1_b, size_b);
-   
+    cudaMalloc((void**)&d1_b, size_b); 
+
     printf("Pinning host memory...\n");
-    // Allocate A, b and C pinned in host memory
+     // Allocate A, b and C pinned in host memory
     cudaMallocHost((void**)&h_A, size_A);
     cudaMallocHost((void**)&h_b, size_b);
     cudaMallocHost((void**)&h_C, size_C);    
 
 
     /* HERE GOES THE MATRIX INIT */
-    h_A[0]=1.0; h_A[1]=1.0; h_A[2]=1.0; h_A[3]=1.0;
-    h_b[0]=1.0; h_b[1]=1.0;
+    double init_A = 2.0, init_b = 2.0;
+    for (int i = 0; i < M*N; i++) h_A[i] = init_A;
+    for (int i = 0; i < N; i++) h_b[i] = init_b;
 
-    printf("Copying data from host to device...\n");
+
+    printf("Copying data from host to device 0...\n");
     // Copy data from host to device 0
+    // Modified version using Async, overlapping data transfer and computation
+    cudaSetDevice(0);
     cudaMemcpy(d0_b, h_b, size_b, cudaMemcpyHostToDevice);
-    cudaMemcpy(d0_C, h_C, size_C/2, cudaMemcpyHostToDevice);
     cudaMemcpy(d0_A, h_A, size_A/2, cudaMemcpyHostToDevice);
-    // Copy data from host to device 1
-    cudaMemcpy(d1_b, h_b, size_b, cudaMemcpyHostToDevice);
-    cudaMemcpy(d1_C, h_C + size_C/2, size_C/2, cudaMemcpyHostToDevice);
-    cudaMemcpy(d1_A, h_A + size_A/2, size_A/2, cudaMemcpyHostToDevice);
     
- 
+    printf("Copying data from host to device 1...\n");
+    // Copy data from host to device 1
+    // Modified version using Async, overlapping data transfer and computation
+    cudaSetDevice(1);
+    cudaMemcpy(d1_b, h_b, size_b, cudaMemcpyHostToDevice);
+    cudaMemcpy(d1_A, h_A + size_A/2, size_A/2, cudaMemcpyHostToDevice);
+
 
     // Invoke Kernel 
-    int threadsPerBlock = 256;
-    int blocksPerGrid = (N + threadsPerBlock - 1) / threadsPerBlock;
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+
+    dim3 dimGrid((((M/2)+BLOCK_SIZE-1) / BLOCK_SIZE), (((N)+BLOCK_SIZE-1) / BLOCK_SIZE));
+    dim3 dimBlock(BLOCK_SIZE,BLOCK_SIZE);
+    
     printf("Invoking kernel...\n");
-    double begin_compute = omp_get_wtime();
+    cudaEventRecord(start); 
     
         // operations on device 0
-        cudaSetDevice(device0);   
-        matvec<<<blocksPerGrid,threadsPerBlock>>>(d0_C, d0_A, d0_b, M/2, N);
+        cudaSetDevice(0);   
+        matvec<<<dimGrid,dimBlock>>>(d0_C, d0_A, d0_b, M/2, N);
+        cudaDeviceSynchronize();
         // operations on device 1
-        cudaSetDevice(device1);   
-        matvec<<<blocksPerGrid,threadsPerBlock>>>(d1_C, d1_A, d1_b, M/2, N);
+        cudaSetDevice(1);
+        matvec<<<dimGrid,dimBlock>>>(d1_C, d1_A, d1_b, M/2, N);
+        cudaDeviceSynchronize();
 
-    cudaDeviceSynchronize();
-    cudaSetDevice(device0);
-    cudaDeviceSynchronize();
-
-    double end_compute = omp_get_wtime() - begin_compute;
-    printf("Operation finished!\t RUNTIME: %3.2f\n", end_compute);
+     cudaEventRecord(stop);
+    
+    
+    float milliseconds = 0;
+    cudaEventElapsedTime(&milliseconds, start, stop);
+    printf("Operation finished!  GPU runtime (ms): %3.6f\n\n", milliseconds);
     
     // Copy results back to host memory
     printf("Copying results back to host memory...\n");
-    cudaSetDevice(device0);
+    // Modified version using Async, overlapping data transfer and computation
+    cudaSetDevice(device0);   
     cudaMemcpy(h_C, d0_C, size_C/2, cudaMemcpyDeviceToHost);
-    cudaSetDevice(device1);
+    cudaSetDevice(device1);   
     cudaMemcpy(h_C + size_C/2, d1_C, size_C/2, cudaMemcpyDeviceToHost);
     
-    printf("%3.2f\t %3.2f\t %3.2f\t %3.2f\n", h_C[0], h_C[1], h_C[2], h_C[3]);
+    //print 4 first terms of the result
+    printf("\n%3.2f\t\n%3.2f\t\n%3.2f\t\n%3.2f\n%3.2f\t\n%3.2f\t\n%3.2f\t\n%3.2f\n", h_C[0], h_C[1], h_C[2], h_C[3], h_C[4], h_C[5], h_C[6], h_C[7]); 
     // Free memory
     printf("Liberating memory allocation...\n");
     cudaFreeHost(h_A), cudaFreeHost(h_b), cudaFreeHost(h_C); 
-    cudaFree(d0_A), cudaFree(d0_b), cudaFree(d0_C); 
+    cudaFree(d0_A), cudaFree(d0_b), cudaFree(d0_C);  
     cudaFree(d1_A), cudaFree(d1_b), cudaFree(d1_C); 
     printf("--- End of script ---\n");
-    
+   
+     
     return(0);
 }

@@ -61,8 +61,8 @@ int main(int argc, char *argv[]) {
 
     printf("Copying data from host to device...\n");
     // Copy data from host to device 0
-    cudaMemcpyAsync(d0_b, h_b, size_b, cudaMemcpyHostToDevice);
-    cudaMemcpyAsync(d0_A, h_A, size_A, cudaMemcpyHostToDevice);
+    cudaMemcpy(d0_b, h_b, size_b, cudaMemcpyHostToDevice);
+    cudaMemcpy(d0_A, h_A, size_A, cudaMemcpyHostToDevice);
 
     // Invoke Kernel 
     cudaEvent_t start, stop;
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
     cudaMemcpy(h_C, d0_C, size_C, cudaMemcpyDeviceToHost);
 
     //print first terms of the result
-    printf("\n%3.2f\t\n%3.2f\t\n%3.2f\t\n%3.2f\n%3.2f\t\n%3.2f\t\n%3.2f\t\n%3.2f\n", h_C[0], h_C[1], h_C[2], h_C[3], h_C[4], h_C[5], h_C[6], h_C[7]);    
+    //printf("\n%3.2f\t\n%3.2f\t\n%3.2f\t\n%3.2f\n%3.2f\t\n%3.2f\t\n%3.2f\t\n%3.2f\n", h_C[0], h_C[1], h_C[2], h_C[3], h_C[4], h_C[5], h_C[6], h_C[7]);    
     
     // Free memory
     printf("Liberating memory allocation...\n");
