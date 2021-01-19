@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <omp.h>
 
+#define BLOCK_SIZE 16
+
 // set multiple GPU devices for computing operation
 const int device0 = 0;
 
@@ -54,38 +56,50 @@ int main(int argc, char *argv[]) {
 
 
     /* HERE GOES THE MATRIX INIT */
+    double init_A = 2.0, init_b = 2.0;
+    for (int i = 0; i < M*N; i++) h_A[i] = init_A;
+    for (int i = 0; i < N; i++) h_b[i] = init_b;
 
     printf("Copying data from host to device...\n");
     // Copy data from host to device 0
     cudaMemcpy(d0_b, h_b, size_b, cudaMemcpyHostToDevice);
-    cudaMemcpy(d0_C, h_C, size_C, cudaMemcpyHostToDevice);
     cudaMemcpy(d0_A, h_A, size_A, cudaMemcpyHostToDevice);
 
     // Invoke Kernel 
-    int threadsPerBlock = 256;
-    int blocksPerGrid = (N + threadsPerBlock - 1) / threadsPerBlock;
-    printf("Invoking kernel...\n");
-    double begin_compute = omp_get_wtime();
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+
+    dim3 dimGrid((((M)+BLOCK_SIZE-1) / BLOCK_SIZE), (((N)+BLOCK_SIZE-1) / BLOCK_SIZE));
+    dim3 dimBlock(BLOCK_SIZE,BLOCK_SIZE);
     
+    printf("Invoking kernel...\n");
+    cudaEventRecord(start); 
         // operations on device 0
         cudaSetDevice(device0);   
-        matvec<<<blocksPerGrid,threadsPerBlock>>>(d0_C, d0_A, d0_b, M, N);
-
+        matvec<<<dimGrid,dimBlock>>>(d0_C, d0_A, d0_b, M, N);
+    cudaEventRecord(stop);
     cudaDeviceSynchronize();
-
-    double end_compute = omp_get_wtime() - begin_compute;
-    printf("Operation finished!\t RUNTIME: %3.2f\n", end_compute);
+    
+    float milliseconds = 0;
+    cudaEventElapsedTime(&milliseconds, start, stop);
+    printf("Operation finished!  GPU runtime (ms): %3.6f\n\n", milliseconds);
     
     // Copy results back to host memory
     printf("Copying results back to host memory...\n");
     cudaSetDevice(device0);
     cudaMemcpy(h_C, d0_C, size_C, cudaMemcpyDeviceToHost);
+
+    //print 4 first terms of the result
+    //printf("\n%3.2f\t\n%3.2f\t\n%3.2f\t\n%3.2f\n", h_C[0], h_C[1], h_C[2], h_C[3]);    
     
     // Free memory
     printf("Liberating memory allocation...\n");
     cudaFreeHost(h_A), cudaFreeHost(h_b), cudaFreeHost(h_C); 
     cudaFree(d0_A), cudaFree(d0_b), cudaFree(d0_C); 
-    printf("--- End of script ---\n");
     
+    printf("--- End of script ---\n");
+   
+     
     return(0);
 }
