@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     
     printf("Allocating device memory...\n");
     // Allocate A, b and C in Device 0
-    //cudaSetDevice(0);
+    cudaSetDevice(0);
     cudaMalloc((void**)&d0_A, size_A);
     cudaMalloc((void**)&d0_C, size_C);
     cudaMalloc((void**)&d0_b, size_b); 
@@ -61,8 +61,9 @@ int main(int argc, char *argv[]) {
 
     printf("Copying data from host to device...\n");
     // Copy data from host to device 0
-    cudaMemcpy(d0_b, h_b, size_b, cudaMemcpyHostToDevice);
-    cudaMemcpy(d0_A, h_A, size_A, cudaMemcpyHostToDevice);
+    // Modified version using Async, overlapping data transfer and computation
+    cudaMemcpyAsync(d0_b, h_b, size_b, cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(d0_A, h_A, size_A, cudaMemcpyHostToDevice);
 
     // Invoke Kernel 
     cudaEvent_t start, stop;
@@ -75,7 +76,7 @@ int main(int argc, char *argv[]) {
     printf("Invoking kernel...\n");
     cudaEventRecord(start); 
         // operations on device 0
-        //cudaSetDevice(device0);   
+        cudaSetDevice(device0);   
         matvec<<<dimGrid,dimBlock>>>(d0_C, d0_A, d0_b, M, N);
     cudaEventRecord(stop);
     cudaDeviceSynchronize();
@@ -86,8 +87,9 @@ int main(int argc, char *argv[]) {
     
     // Copy results back to host memory
     printf("Copying results back to host memory...\n");
-    //cudaSetDevice(device0);
-    cudaMemcpy(h_C, d0_C, size_C, cudaMemcpyDeviceToHost);
+    cudaSetDevice(device0);   
+    // Modified version using Async, overlapping data transfer and computation
+    cudaMemcpyAsync(h_C, d0_C, size_C, cudaMemcpyDeviceToHost);
 
     //print 4 first terms of the result
     //printf("\n%3.2f\t\n%3.2f\t\n%3.2f\t\n%3.2f\n", h_C[0], h_C[1], h_C[2], h_C[3]);    
