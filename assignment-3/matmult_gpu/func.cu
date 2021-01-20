@@ -8,6 +8,16 @@ extern "C" {
 #include <omp.h>
 #include <cblas.h> // for matmult_lib()
 
+/* Initialization of 2d arrays */
+void init_2d (double max_val, int m, int n, double* A) {
+    int i, j;
+    for (i = 0; i < m; i++) {
+        for (j = 0; j < n; j++) {
+            A[i][j] = (double)rand()*max_val/RAND_MAX;
+        }
+    }
+}
+
 /* Native CBLAS CPU implementation of matrix multiplication */
 void matmult_lib(int M, int N, int K, double *A, double *B, double *C) {
         double alpha = 1.0, beta = 0.0;
@@ -174,15 +184,15 @@ void matmult_gpu3(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
     /* GPU: Allocate memory on device */
     printf("Allocating memory... \n");
     cudaMalloc((void**)&d_A, size_A);
-    cudaMalloc((void**)&d_B, size_b);
-    cudaMalloc((void**)&d_C, size_c);
+    cudaMalloc((void**)&d_B, size_B);
+    cudaMalloc((void**)&d_C, size_C);
 
     /* GPU: Allocate memory on host */
     cudaMallocHost((void**)&h_A, size_A);
-    cudaMallocHost((void**)&h_B, size_b);
-    cudaMallocHost((void**)&h_C, size_c);
+    cudaMallocHost((void**)&h_B, size_B);
+    cudaMallocHost((void**)&h_C, size_C);
 
-    /* Initialize matrices with random data (h_A. h_b)*/
+    /* Initialize matrices with random data (h_A. h_B)*/
     printf("Initializing matrices... \n");
     init_2d(max_val, M, K, h_A);
     init_2d(max_val, K, N, h_B);
@@ -213,7 +223,7 @@ void matmult_gpu3(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
     printf("Freeing memory... \n");
     cudaFreeHost(h_A);
     cudaFreeHost(h_B);
-    cudaFreeHost(h_c);
+    cudaFreeHost(h_C);
     cudaFree(d_A);
     cudaFree(d_B);
     cudaFree(d_C);
@@ -226,7 +236,7 @@ __global__ void matmult_gpu4_kernel(int M, int N, int K, double* A, double* B, d
     int j = (blockIdx.y * blockDim.y + threadIdx.y)*stride_col;
 
     for (int s_row = 0; s_row < stride_row; s_row++) {
-        for (int s_col = 0; s_col < stride_col; scol++) {
+        for (int s_col = 0; s_col < stride_col; s_col++) {
             if ((s_row + i) < M && (j + s_col) < N){ // ensure that the extra threads do not do any work
                 for (int step = 0; step < K; step++) {
                     temp += A[(s_row + i)*K + step] * B[step*N + (j + s_col)];
@@ -293,21 +303,7 @@ void matmult_gpu4(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
     cudaFree(d_C);
 }
 /* part 5: GPU (shared memory version) */
-__global__ void matmult_gpu5() {
-  
-}
 
 /* part 6: DGEMM function for GPUs, NVIDIA */
-__global__ void matmult_gpulib() {
-}
 
-/* Initialization of 2d arrays */
-void init_2d (double max_val, int m, int n, double* A) {
-    int i, j;
-    for (i = 0; i < m; i++) {
-        for (j = 0; j < n; j++) {
-            A[i][j] = (double)rand()*max_val/RAND_MAX;
-        }
-    }
-}
 }
