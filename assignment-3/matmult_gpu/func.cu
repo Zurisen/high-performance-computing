@@ -8,16 +8,6 @@ extern "C" {
 #include <omp.h>
 #include <cblas.h> // for matmult_lib()
 
-/* Initialization of 2d arrays */
-void init_2d (double max_val, int m, int n, double* A) {
-    int i, j;
-    for (i = 0; i < m; i++) {
-        for (j = 0; j < n; j++) {
-            A[i][j] = (double)rand()*max_val/RAND_MAX;
-        }
-    }
-}
-
 /* Native CBLAS CPU implementation of matrix multiplication */
 void matmult_lib(int M, int N, int K, double *A, double *B, double *C) {
         double alpha = 1.0, beta = 0.0;
@@ -60,8 +50,17 @@ void matmult_gpu1(int M, int N, int K, double* A, double *B, double* C) {
 
     /* Initialize matrices with random data (h_A. h_B)*/
     printf("Initializing matrices... \n");
-    init_2d(max_val, M, K, h_A);
-    init_2d(max_val, K, N, h_B);
+    int i, j;
+    for (i = 0; i < M; i++) {
+        for (j = 0; j < K; j++) {
+            h_A[i][j] = (double)rand()*max_val/RAND_MAX;
+        }
+    }
+    for (i = 0; i < K; i++) {
+        for (j = 0; j < N; j++) {
+            h_B[i][j] = (double)rand()*max_val/RAND_MAX;
+        }
+    }
 
     /* Copying data to device */
     printf("Copying data to device... \n");
@@ -124,8 +123,17 @@ void matmult_gpu2(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
 
     /* Initialize matrices with random data (h_A. h_B)*/
     printf("Initializing matrices... \n");
-    init_2d(max_val, M, K, h_A);
-    init_2d(max_val, K, N, h_B);
+    int i, j;
+    for (i = 0; i < M; i++) {
+        for (j = 0; j < K; j++) {
+            h_A[i][j] = (double)rand()*max_val/RAND_MAX;
+        }
+    }
+    for (i = 0; i < K; i++) {
+        for (j = 0; j < N; j++) {
+            h_B[i][j] = (double)rand()*max_val/RAND_MAX;
+        }
+    }
 
     /* Copying data to device */
     printf("Copying data to device... \n");
@@ -194,8 +202,17 @@ void matmult_gpu3(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
 
     /* Initialize matrices with random data (h_A. h_B)*/
     printf("Initializing matrices... \n");
-    init_2d(max_val, M, K, h_A);
-    init_2d(max_val, K, N, h_B);
+    int i, j;
+    for (i = 0; i < M; i++) {
+        for (j = 0; j < K; j++) {
+            h_A[i][j] = (double)rand()*max_val/RAND_MAX;
+        }
+    }
+    for (i = 0; i < K; i++) {
+        for (j = 0; j < N; j++) {
+            h_B[i][j] = (double)rand()*max_val/RAND_MAX;
+        }
+    }
 
     /* Copying data to device */
     printf("Copying data to device... \n");
@@ -267,8 +284,17 @@ void matmult_gpu4(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
 
     /* Initialize matrices with random data (h_A. h_b)*/
     printf("Initializing matrices... \n");
-    init_2d(max_val, M, K, h_A);
-    init_2d(max_val, K, N, h_B);
+    int i, j;
+    for (i = 0; i < M; i++) {
+        for (j = 0; j < K; j++) {
+            h_A[i][j] = (double)rand()*max_val/RAND_MAX;
+        }
+    }
+    for (i = 0; i < K; i++) {
+        for (j = 0; j < N; j++) {
+            h_B[i][j] = (double)rand()*max_val/RAND_MAX;
+        }
+    }
 
     /* Copying data to device */
     printf("Copying data to device... \n");
@@ -286,7 +312,7 @@ void matmult_gpu4(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
     dim3 blocksPerGrid(((M+BLOCK_SIZE-1) / (stride_row * BLOCK_SIZE)), ((N+BLOCK_SIZE-1) / (stride_col * BLOCK_SIZE)));
     dim3 threadsPerBlock(BLOCK_SIZE, BLOCK_SIZE);
 
-    matmult_gpu3_kernel<<<blocksPerGrid,threadsPerBlock>>>(M, N, K, d_A, d_B, d_C, stride_row, stride_col);
+    matmult_gpu4_kernel<<<blocksPerGrid,threadsPerBlock>>>(M, N, K, d_A, d_B, d_C, stride_row, stride_col);
     cudaDeviceSynchronize();
 
     printf("Copying results back to host... \n");
