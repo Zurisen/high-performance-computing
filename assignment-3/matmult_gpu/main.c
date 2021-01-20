@@ -13,24 +13,59 @@ const int device0 = 0;
 
 
 /* Native CBLAS CPU implementation of matrix multiplication */
-__global__ void matmult_lib(int M, int N, int K, double *A, double *B, double *C) {
+void matmult_lib(int M, int N, int K, double *A, double *B, double *C) {
         double alpha = 1.0, beta = 0.0;
-        cblas_dgemm(CblasRowMajor,CblasNoTrans,CblasNoTrans,M,N,K,alpha,A[0],K,B[0],N,beta,C[0],N);
+        cblas_dgemm(CblasRowMajor,CblasNoTrans,CblasNoTrans,M,N,K,A,K,B,N,beta,C, N);
 }
 
 /* part 1: sequential implementation in GPU (single thread) */
-__global__ void matmult_gpu1(int M, int N, int K, double** A, double **B, double** C) {
+__global__ void matmult_gpu1_kernel(int M, int N, int K, double** A, double **B, double** C) {
+    double temp = 0;
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if (i < m && j < n) {
-        atomicAdd(&C[i], A[i *n +j] * B[j]);
+    if (i < M && j < N){ // ensure that the extra threads do not do any work
+        for (int step = 0; step < K; step++) {
+            temp += A[i*K + step] * B[step*N + j];
+        }
+        C[i*N + j] = temp;
     }
 }
 
-/* part 2: naive implementation in GPU (one thread per element in C) */
-__global__ void matmult_gpu2(int M, int N, int K, double** A, double **B, double** C) {
+void matmult_gpu1(int M, int N, int K, double** A, double **B, double** C) {
+    // Define grid and threads per block
+    // declare the number of blocks per grid and the number of threads per block
+    // use 1 to 512 threads per block
+    dim3 dim_grid(((M+BLOCK_SIZE-1) / BLOCK_SIZE), ((N+BLOCK_SIZE-1) / BLOCK_SIZE));
+    dim3 dim_block(BLOCK_SIZE, BLOCK_SIZE);
 
+    matmult_gpu1<<<1,1>>>(M, N, K, d_A, d_B, d_C);
+    cudaDeviceSynchronize():
+}
+
+/* part 2: naive implementation in GPU (one thread per element in C) */
+__global__ void matmult_gpu2_kernel(int M, int N, int K, double** A, double **B, double** C) {
+    double temp = 0;
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    int j = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if (i < M && j < N){ // ensure that the extra threads do not do any work
+        for (int step = 0; step < K; step++) {
+            temp += A[i*K + step] * B[step*N + j];
+        }
+        C[i*N + j] = temp;
+    }
+}
+
+void matmult_gpu2(int M, int N, int K, double** A, double **B, double** C) {
+    // Define grid and threads per block
+    // declare the number of blocks per grid and the number of threads per block
+    // use 1 to 512 threads per block
+    dim3 dim_grid(((M+BLOCK_SIZE-1) / BLOCK_SIZE), ((N+BLOCK_SIZE-1) / BLOCK_SIZE));
+    dim3 dim_block(BLOCK_SIZE, BLOCK_SIZE);
+
+    matmult_gpu1<<<1,1>>>(M, N, K, d_A, d_B, d_C);
+    cudaDeviceSynchronize():
 }
 
 /* part 3: GPU (thread computes 2 elements of C) */
@@ -127,9 +162,6 @@ int main(int argc, char *argv[]) {
     cudaMemcpy(d_B, h_B, size_B, cudaMemcpyHostToDevice);
     time_IO_1 = omp_get_wtime() - time_start;
 
-    /* Define grid and threads per block */
-    dim3 dim_grid(((M+BLOCK_SIZE-1) / BLOCK_SIZE), ((N+BLOCK_SIZE-1) / BLOCK_SIZE));
-    dim3 dim_block(BLOCK_SIZE, BLOCK_SIZE);
 
     /* MATRIX MULTIPLICATION */
     printf("Computing Matrix multiplication... \n");
@@ -143,7 +175,7 @@ int main(int argc, char *argv[]) {
         break;
     case "gpu1":
         printf("Executing gpu1 version...");
-        matmult_gpu1<<<dim_grid, dim_block>>>(M, N, d_A, d_B, d_C);
+        matmult_gpu1(M, N, d_A, d_B, d_C);
         break;
     case "gpu2":
         printf("Executing gpu2 version...");
@@ -170,6 +202,7 @@ int main(int argc, char *argv[]) {
     if (type != "lib") { // if using gpu
         printf("Copying results back to host... \n");
         cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
+        cudaDeviceSynchronize();
     }
     time_end = omp_get_wtime();
     time_IO_2 = time_end - time_end_compute;
