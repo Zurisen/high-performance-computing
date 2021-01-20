@@ -1,0 +1,64 @@
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "alloc3d_gpu.h"
+#include "func.h"
+
+__global__ void jacobi_v1(double *d_u, double *d_uOld, double *d_f, int N, int N2, int iter_max, double frac, double delta2){
+
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    int j = blockIdx.y * blockDim.y + threadIdx.y;
+    int k = blockIdx.z * blockDim.z + threadIdx.z;
+
+    if (i>0 && i<N-1 && j>0 && j<N-1 && k>0 && k<N-1){
+       	d_u[i*N2+j*N+k]	= frac*(d_uOld[(i-1)*N2+j*N+k]+d_uOld[(i+1)*N2+j*N+k]+
+ 	d_uOld[i*N2+(j-1)*N+k]+d_uOld[i*N2+(j+1)*N+k]+d_uOld[i*N2+j*N+k-1]+
+       	d_uOld[i*N2+j*N+k+1]+delta2*d_f[i*N2+j*N+k]);
+    }
+}
+
+int main(int argc, char *argv[]){
+    
+    int N = atoi(argv[1]);
+    int iter_max = atoi(argv[2]);
+    double start_T = atof(argv[3]);
+
+    int N2 = N * N;
+    // Wake up gpu
+    cudaSetDevice(0);
+    double *d_dummy;
+    cudaMalloc((void**)&d_dummy,0;
+
+    double *d_u, *d_uOld, *d_uSwap, *d_f;
+    double *h_u, *h_uOld, *h_uSwap, *h_f;
+    double size = N * N * N * sizeof(double);
+
+    // Device memory allocation 
+    cudaMalloc((void**)&d_u, size);
+    cudaMalloc((void**)&d_uOld, size);
+    cudaMalloc((void**)&d_uSwap, size);
+    cudaMalloc((void**)&d_f, size);
+
+    // Pinning memory in host
+    cudaMallocHost((void**)&h_u, size);
+    cudaMallocHost((void**)&h_uOld, size);
+    cudaMallocHost((void**)&h_uSwap, size);
+    cudaMallocHost((void**)&h_f, size);
+
+    // Initialization of the arrays
+    u_init(h_u, N, N2, start_T); 
+    u_init(h_uOld, N, N2, start_T); 
+    u_init(h_uSwap, N, N2, start_T); 
+    f_init(f, N, N2);
+
+    // Jacobi max iterations loop in host
+    double frac = 1.0/6.0;
+    double delta2 = (2.0*2.0)/N2; 
+    while (it < iter_max) {
+        d_uSwap = d_uOld;
+        d_u = d_uOld;
+        d_uOld = d_uSwap;   
+        jacobi_v1<<<d_u,d_uOld,d_f,N,N2,iter_max,frac,delta2>>>();
+
+    }
+}
