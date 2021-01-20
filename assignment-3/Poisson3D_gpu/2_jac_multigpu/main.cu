@@ -11,7 +11,7 @@ __global__ void jacobi_v3dv1(double *d_u, double *d_uOld, double *d_f, int N, in
     int j = blockIdx.y * blockDim.y + threadIdx.y;
     int k = blockIdx.z * blockDim.z + threadIdx.z;
 
-    if (i>0 && i<N/2-1 && j>0 && j<N/2-1 && k>0 && k<N-1){ 
+    if (i>0 && i<N/2-1 && j>0 && j<N-1 && k>0 && k<N-1){ 
        	d_u[i*N2+j*N+k]	= frac*(d_uOld[(i-1)*N2+j*N+k]+d_uOld[(i+1)*N2+j*N+k]+d_uOld[i*N2+(j-1)*N+k]+d_uOld[i*N2+(j+1)*N+k]+d_uOld[i*N2+j*N+k-1]+d_uOld[i*N2+j*N+k+1]+delta2*d_f[i*N2+j*N+k]);
     }
 }
@@ -21,7 +21,7 @@ __global__ void jacobi_v3dv2(double *d_u, double *d_uOld, double *d_f, int N, in
     int j = blockIdx.y * blockDim.y + threadIdx.y;
     int k = blockIdx.z * blockDim.z + threadIdx.z;
 
-    if (i>0 && i<N/2-1 && j>0 && j<N/2-1 && k>0 && k<N-1){ 
+    if (i>0 && i<N/2-1 && j>0 && j<N-1 && k>0 && k<N-1){ 
        	d_u[i*N2+j*N+k]	= frac*(d_uOld[(i-1)*N2+j*N+k]+d_uOld[(i+1)*N2+j*N+k]+d_uOld[i*N2+(j-1)*N+k]+d_uOld[i*N2+(j+1)*N+k]+d_uOld[i*N2+j*N+k-1]+d_uOld[i*N2+j*N+k+1]+delta2*d_f[i*N2+j*N+k]);
     }
 }
@@ -98,7 +98,7 @@ int main(int argc, char *argv[]){
 
     // kernel settings
     dim3 blocksize(10,10,10);
-    dim3 gridsize( ceil((double) N/(2*blocksize.x)),ceil((double) N/(2*blocksize.y)),ceil((double) N/(2*blocksize.z)) );
+    dim3 gridsize( ceil((double) N/(blocksize.x)),ceil((double) N/(blocksize.y)),ceil((double) N/(blocksize.z)) );
     
     // Jacobi max iterations loop in host
     double frac = 1.0/6.0;
