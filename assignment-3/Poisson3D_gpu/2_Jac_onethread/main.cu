@@ -4,7 +4,7 @@
 #include "alloc3d_gpu.h"
 #include "func.h"
 #include "print.h"
-
+#include <omp.h>
 __global__ void jacobi_v1(double *d_u, double *d_uOld, double *d_f, int N, int N2, int iter_max, double frac, double delta2){
 
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -56,10 +56,10 @@ int main(int argc, char *argv[]){
     f_init(h_f, N, N2);
 
     // Copy initializationf from host to device
-    cudaMemcpy(d_u, h_u, size, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_uOld, h_uOld, size, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_uSwap, h_uSwap, size, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_f, h_f, size, cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(d_u, h_u, size, cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(d_uOld, h_uOld, size, cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(d_uSwap, h_uSwap, size, cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(d_f, h_f, size, cudaMemcpyHostToDevice);
 
     // kernel settings
     dim3 blocksize(10,10,10);
@@ -90,9 +90,6 @@ int main(int argc, char *argv[]){
         cudaEventElapsedTime(&cycle, start, stop);
         elapsed += cycle;
     }
-
-    printf("Operation finished!  GPU runtime (ms): %3.6f\n\n", elapsed);
-
     // Copy back to host
     cudaMemcpy(h_u, d_u, size, cudaMemcpyDeviceToHost);
 
@@ -104,13 +101,20 @@ int main(int argc, char *argv[]){
         case 4:
             output_ext = ".vtk";
             sprintf(output_filename, "%s_%d%s", output_prefix, N, output_ext);
-            fprintf(stderr, "Write VTK file to %s: ", output_filename);
+            //fprintf(stderr, "Write VTK file to %s: ", output_filename);
             print_vtk(output_filename, N, h_u);
             break;
         default:
             fprintf(stderr, "Non-supported output type!\n");
             break;
     }
+
+    // Calculate effective bandwidth
+    double efBW = N*N*N*sizeof(double)*5*it/elapsed/1e6; 
+       // 5 -> read uold, uswap, f | read and write u 
+    
+    //print info
+    printf("%d %d %3.6f %3.6f\n", N, it, elapsed,efBW);
 
     //Free host and device memory    
     cudaFreeHost(h_f);
