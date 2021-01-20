@@ -8,9 +8,6 @@
 
 #define BLOCK_SIZE 16
 
-// set multiple GPU devices for computing operation
-const int device0 = 0;
-
 
 /* Native CBLAS CPU implementation of matrix multiplication */
 void matmult_lib(int M, int N, int K, double *A, double *B, double *C) {
@@ -137,7 +134,6 @@ __global__ void matmult_gpulib(int M, int N, int K, double **A, double **B, doub
         cublasDgemm(CblasRowMajor,CblasNoTrans,CblasNoTrans,M,N,K,alpha,A[0],K,B[0],N,beta,C[0],N);
 }
 
-
 /*
 The drivers still take the same command line arguments:
 
@@ -178,7 +174,7 @@ int main(int argc, char *argv[]) {
     // warm up
     printf("Warming up GPU...\n");
     double *dummy_d;
-    cudaSetDevice(device0);
+    cudaSetDevice(0);
     cudaMalloc((void**)&dummy_d, 0);
 
     double *d_A, *d_B, *d_C; // Device variables
@@ -223,22 +219,27 @@ int main(int argc, char *argv[]) {
         break;
     case "gpu1":
         printf("Executing gpu1 version...");
-        matmult_gpu1(M, N, d_A, d_B, d_C);
+        matmult_gpu1(M, N, K, d_A, d_B, d_C);
         break;
     case "gpu2":
         printf("Executing gpu2 version...");
+        matmult_gpu2(M, N, K, d_A, d_B, d_C);
         break;
     case "gpu3":
         printf("Executing gpu3 version...");
+        matmult_gpu3(M, N, K, d_A, d_B, d_C);
         break;
     case "gpu4":
         printf("Executing gpu4 version...");
+        matmult_gpu4(M, N, K, d_A, d_B, d_C);
         break;
     case "gpu5":
         printf("Executing gpu5 version...");
+        // TODO:
         break;
     case "gpulib":
         printf("Executing gpulib version...");
+        // TODO:
         break;
     default:
         printf("Error: Not valid type.");
@@ -255,7 +256,6 @@ int main(int argc, char *argv[]) {
     time_end = omp_get_wtime();
     time_IO_2 = time_end - time_end_compute;
     total_time_compute = time_start_compute- time_end_compute;
-
 
     /* generate stats to print */
     printf("Generating results stats...\n");
