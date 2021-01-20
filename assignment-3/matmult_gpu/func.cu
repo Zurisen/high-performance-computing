@@ -4,7 +4,6 @@ extern "C" {
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "func.h" // for init_2d()
 #include <math.h> // for pow()
 #include <omp.h>
 #include <cblas.h> // for matmult_lib()
@@ -12,7 +11,7 @@ extern "C" {
 /* Native CBLAS CPU implementation of matrix multiplication */
 void matmult_lib(int M, int N, int K, double *A, double *B, double *C) {
         double alpha = 1.0, beta = 0.0;
-        cblas_dgemm(CblasRowMajor,CblasNoTrans,CblasNoTrans,M,N,K,A,K,B,N,beta,C, N);
+        cblas_dgemm(CblasRowMajor,CblasNoTrans,CblasNoTrans,M,N,K,alpha,A,K,B,N,beta,C, N);
 }
 
 /* part 1: sequential implementation in GPU (single thread) */
@@ -40,15 +39,15 @@ void matmult_gpu1(int M, int N, int K, double* A, double *B, double* C) {
     /* GPU: Allocate memory on device */
     printf("Allocating memory... \n");
     cudaMalloc((void**)&d_A, size_A);
-    cudaMalloc((void**)&d_B, size_b);
-    cudaMalloc((void**)&d_C, size_c);
+    cudaMalloc((void**)&d_B, size_B);
+    cudaMalloc((void**)&d_C, size_C);
 
     /* GPU: Allocate memory on host */
     cudaMallocHost((void**)&h_A, size_A);
-    cudaMallocHost((void**)&h_B, size_b);
-    cudaMallocHost((void**)&h_C, size_c);
+    cudaMallocHost((void**)&h_B, size_B);
+    cudaMallocHost((void**)&h_C, size_C);
 
-    /* Initialize matrices with random data (h_A. h_b)*/
+    /* Initialize matrices with random data (h_A. h_B)*/
     printf("Initializing matrices... \n");
     init_2d(max_val, M, K, h_A);
     init_2d(max_val, K, N, h_B);
@@ -74,7 +73,7 @@ void matmult_gpu1(int M, int N, int K, double* A, double *B, double* C) {
     printf("Freeing memory... \n");
     cudaFreeHost(h_A);
     cudaFreeHost(h_B);
-    cudaFreeHost(h_c);
+    cudaFreeHost(h_C);
     cudaFree(d_A);
     cudaFree(d_B);
     cudaFree(d_C);
@@ -104,15 +103,15 @@ void matmult_gpu2(int M, int N, int K, double* A, double *B, double* C) {
     /* GPU: Allocate memory on device */
     printf("Allocating memory... \n");
     cudaMalloc((void**)&d_A, size_A);
-    cudaMalloc((void**)&d_B, size_b);
-    cudaMalloc((void**)&d_C, size_c);
+    cudaMalloc((void**)&d_B, size_B);
+    cudaMalloc((void**)&d_C, size_C);
 
     /* GPU: Allocate memory on host */
     cudaMallocHost((void**)&h_A, size_A);
-    cudaMallocHost((void**)&h_B, size_b);
-    cudaMallocHost((void**)&h_C, size_c);
+    cudaMallocHost((void**)&h_B, size_B);
+    cudaMallocHost((void**)&h_C, size_C);
 
-    /* Initialize matrices with random data (h_A. h_b)*/
+    /* Initialize matrices with random data (h_A. h_B)*/
     printf("Initializing matrices... \n");
     init_2d(max_val, M, K, h_A);
     init_2d(max_val, K, N, h_B);
@@ -142,7 +141,7 @@ void matmult_gpu2(int M, int N, int K, double* A, double *B, double* C) {
     printf("Freeing memory... \n");
     cudaFreeHost(h_A);
     cudaFreeHost(h_B);
-    cudaFreeHost(h_c);
+    cudaFreeHost(h_C);
     cudaFree(d_A);
     cudaFree(d_B);
     cudaFree(d_C);
