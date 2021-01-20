@@ -73,21 +73,25 @@ int main(int argc, char *argv[]){
         cudaEventCreate(&stop);
     
     int it = 0;
-    cudaEventRecord(start);
+    float elapsed=0, cycle;
     while(it < iter_max){
+    
+        cudaEventRecord(start,0);
+       
         d_uSwap = d_uOld;
         d_u = d_uOld;
         d_uOld = d_uSwap;   
         jacobi_v1<<<gridsize,blocksize>>>(d_u, d_uOld, d_f, N, N2, iter_max, frac, delta2);
         cudaDeviceSynchronize();
-        
         it++;
+       
+        cudaEventRecord(stop,0);
+        cudaEventSynchronize(stop);
+        cudaEventElapsedTime(&cycle, start, stop);
+        elapsed += cycle;
     }
-    cudaEventRecord(stop);
 
-    float milliseconds = 0;
-    cudaEventElapsedTime(&milliseconds, start, stop);
-    printf("Operation finished!  GPU runtime (ms): %3.6f\n\n", milliseconds);
+    printf("Operation finished!  GPU runtime (ms): %3.6f\n\n", elapsed);
 
     // Copy back to host
     cudaMemcpy(h_u, d_u, size, cudaMemcpyDeviceToHost);
