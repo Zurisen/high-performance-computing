@@ -3,12 +3,27 @@
 #include <stdlib.h>
 #include "alloc3d_gpu.h"
 #include "func.h"
-#include "jacobi.h"
+
+__global__ void jacobi_v1(double *d_u, double *d_uOld, double *d_f, int N, int N2, int iter_max, double frac, double delta2){
+
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    int j = blockIdx.y * blockDim.y + threadIdx.y;
+    int k = blockIdx.z * blockDim.z + threadIdx.z;
+
+    if (i>0 && i<N-1 && j>0 && j<N-1 && k>0 && k<N-1){
+       	d_u[i*N2+j*N+k]	= frac*(d_uOld[(i-1)*N2+j*N+k]+d_uOld[(i+1)*N2+j*N+k]+
+ 	d_uOld[i*N2+(j-1)*N+k]+d_uOld[i*N2+(j+1)*N+k]+d_uOld[i*N2+j*N+k-1]+
+       	d_uOld[i*N2+j*N+k+1]+delta2*d_f[i*N2+j*N+k]);
+    }
+}
 
 int main(int argc, char *argv[]){
     
-    double start_T = atof(argv[])
-    int N;
+    int N = atoi(argv[1]);
+    int iter_max = atoi(argv[2]);
+    double start_T = atof(argv[3]);
+    output_type = atoi(argv[4]);
+
     int N2 = N * N;
     // Wake up gpu
     cudaSetDevice(0);
@@ -37,6 +52,72 @@ int main(int argc, char *argv[]){
     u_init(h_uSwap, N, N2, start_T); 
     f_init(f, N, N2);
 
+    // Copy initializationf from host to device
+    cudaMemcpy(d_u, h_u, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_uOld, h_uOld, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_uSwap, h_uSwap, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_f, h_f, size, cudaMemcpyHostToDevice);
 
+    // kernel settings
+    dim3 blocksize(10,10,10);
+    dim3 gridsize( ceil((double) N/threadsPerBlock.x),ceil((double) N/threadsPerBlock.y),ceil((double) N/threadsPerBlock.z) );
+    // Jacobi max iterations loop in host
+    double frac = 1.0/6.0;
+    double delta2 = (2.0*2.0)/N2;
+        // timing
+        cudaEvent_t start, stop;
+        cudaEventCreate(&start);
+        cudaEventCreate(&stop);
+    
+    cudaEventRecord(start); 
+    while (it < iter_max; it++) {
+        d_uSwap = d_uOld;
+        d_u = d_uOld;
+        d_uOld = d_uSwap;   
+        jacobi_v1<<<gridsize,blocksize>>>(d_u, d_uOld, d_f, N, N2, iter_max, frac, delta2);
+        cudaDeviceSynchronize();
+    }
+    cudaEventRecord(stop);
 
+    float milliseconds = 0;
+    cudaEventElapsedTime(&milliseconds, start, stop);
+    printf("Operation finished!  GPU runtime (ms): %3.6f\n\n", milliseconds);
+
+    // Copy back to host
+    cudaMemcpy(h_u, d_u, size, cudaMemcpyDeviceToHost);
+
+    // dump  results if wanted
+    switch(output_type) {
+        case 0:
+            // no output at all
+            break;
+        case 3:
+            output_ext = ".bin";
+            sprintf(output_filename, "%s_%d%s", output_prefix, N, output_ext>
+            fprintf(stderr, "Write binary dump to %s: ", output_filename);
+            print_binary(output_filename, N, h_u);
+            break;
+        case 4:
+            output_ext = ".vtk";
+            sprintf(output_filename, "%s_%d%s", output_prefix, N, output_ext>
+            fprintf(stderr, "Write VTK file to %s: ", output_filename);
+            print_vtk(output_filename, N, h_u);
+            break;
+        default:
+            fprintf(stderr, "Non-supported output type!\n");
+            break;
+    }
+
+    //Free host and device memory    
+    cudaFreeHost(h_f);
+    cudaFreeHost(h_u);
+    cudaFreeHost(h_uOld);
+    cudaFreeHost(h_uSwap);
+    
+    cudaFreeHost(d_f);
+    cudaFreeHost(d_u);
+    cudaFreeHost(d_uOld);
+    cudaFreeHost(d_uSwap);
+   
+    return(0); 
 }
