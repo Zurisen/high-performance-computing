@@ -19,7 +19,7 @@ void matmult_lib(int M, int N, int K, double *A, double *B, double *C) {
 }
 
 /* part 1: sequential implementation in GPU (single thread) */
-__global__ void matmult_gpu1_kernel(int M, int N, int K, double** A, double **B, double** C) {
+__global__ void matmult_gpu1_kernel(int M, int N, int K, double* A, double *B, double* C) {
     double temp = 0;
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
@@ -32,19 +32,17 @@ __global__ void matmult_gpu1_kernel(int M, int N, int K, double** A, double **B,
     }
 }
 
-void matmult_gpu1(int M, int N, int K, double** A, double **B, double** C) {
+void matmult_gpu1(int M, int N, int K, double* A, double *B, double* C) {
     // Define grid and threads per block
     // declare the number of blocks per grid and the number of threads per block
     // use 1 to 512 threads per block
-    dim3 dim_grid(((M+BLOCK_SIZE-1) / BLOCK_SIZE), ((N+BLOCK_SIZE-1) / BLOCK_SIZE));
-    dim3 dim_block(BLOCK_SIZE, BLOCK_SIZE);
 
-    matmult_gpu1<<<1,1>>>(M, N, K, d_A, d_B, d_C);
+    matmult_gpu1_kernel<<<1,1>>>(M, N, K, d_A, d_B, d_C);
     cudaDeviceSynchronize():
 }
 
 /* part 2: naive implementation in GPU (one thread per element in C) */
-__global__ void matmult_gpu2_kernel(int M, int N, int K, double** A, double **B, double** C) {
+__global__ void matmult_gpu2_kernel(int M, int N, int K, double* A, double* B, double* C) {
     double temp = 0;
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
@@ -57,22 +55,46 @@ __global__ void matmult_gpu2_kernel(int M, int N, int K, double** A, double **B,
     }
 }
 
-void matmult_gpu2(int M, int N, int K, double** A, double **B, double** C) {
+void matmult_gpu2(int M, int N, int K, double* A, double *B, double* C) {
     // Define grid and threads per block
     // declare the number of blocks per grid and the number of threads per block
     // use 1 to 512 threads per block
-    dim3 dim_grid(((M+BLOCK_SIZE-1) / BLOCK_SIZE), ((N+BLOCK_SIZE-1) / BLOCK_SIZE));
-    dim3 dim_block(BLOCK_SIZE, BLOCK_SIZE);
+    int BLOCK_SIZE = 16;
+    dim3 blocksPerGrid(((M+BLOCK_SIZE-1) / BLOCK_SIZE), ((N+BLOCK_SIZE-1) / BLOCK_SIZE));
+    dim3 threadsPerBlock(BLOCK_SIZE, BLOCK_SIZE);
 
-    matmult_gpu1<<<1,1>>>(M, N, K, d_A, d_B, d_C);
+    matmult_gpu2_kernel<<<blocksPerGrid,threadsPerBlock>>>(M, N, K, d_A, d_B, d_C);
     cudaDeviceSynchronize():
 }
 
 /* part 3: GPU (thread computes 2 elements of C) */
-__global__ void matmult_gpu3(int M, int N, int K, double** A, double **B, double** C) {
+__global__ void matmult_gpu3_kernel(int M, int N, int K, double* A, double* B, double* C, int stride) {
+    double temp = 0;
+    int i = (blockIdx.x * blockDim.x + threadIdx.x)*stride;
+    int j = blockIdx.y * blockDim.y + threadIdx.y;
 
+    for (int s = 0; s < stride; s++) {
+        if ((s + i) < M && j < N){ // ensure that the extra threads do not do any work
+            for (int step = 0; step < K; step++) {
+                temp += A[(s + i)*K + step] * B[step*N + j];
+            }
+            C[(s + i)*N + j] = temp;
+        }
+    }
 }
 
+void matmult_gpu3(int M, int N, int K, double* A, double *B, double* C) {
+    // Define grid and threads per block
+    // declare the number of blocks per grid and the number of threads per block
+    // use 1 to 512 threads per block
+    int BLOCK_SIZE = 16;
+    int stride = 2;
+    dim3 blocksPerGrid(((M+BLOCK_SIZE-1) / (stride * BLOCK_SIZE)), ((N+BLOCK_SIZE-1) / BLOCK_SIZE));
+    dim3 threadsPerBlock(BLOCK_SIZE, BLOCK_SIZE);
+
+    matmult_gpu3_kernel<<<blocksPerGrid,threadsPerBlock>>>(M, N, K, d_A, d_B, d_C, stride);
+    cudaDeviceSynchronize():
+}
 /* part 4: GPU (thread computes >2 elements of C) */
 __global__ void matmult_gpu4(int M, int N, int K, double** A, double **B, double** C) {
 
