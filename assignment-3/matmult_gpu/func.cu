@@ -17,8 +17,8 @@ void matmult_lib(int M, int N, int K, double *A, double *B, double *C) {
 /* part 1: sequential implementation in GPU (single thread) */
 __global__ void matmult_gpu1_kernel(int M, int N, int K, double* A, double *B, double* C) {
     double temp = 0.0;
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    int j = blockIdx.y * blockDim.y + threadIdx.y;
+    int j = blockIdx.x * blockDim.x + threadIdx.x;
+    int i = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (i < M && j < N){ // ensure that the extra threads do not do any work
         for (int step = 0; step < K; step++) {
@@ -78,8 +78,8 @@ void matmult_gpu1(int M, int N, int K, double* A, double *B, double* C) {
 /* part 2: naive implementation in GPU (one thread per element in C) */
 __global__ void matmult_gpu2_kernel(int M, int N, int K, double* A, double* B, double* C) {
     double temp = 0.0;
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    int j = blockIdx.y * blockDim.y + threadIdx.y;
+    int j = blockIdx.x * blockDim.x + threadIdx.x;
+    int i = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (i < M && j < N){ // ensure that the extra threads do not do any work
         for (int step = 0; step < K; step++) {
@@ -141,8 +141,8 @@ void matmult_gpu2(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
 /* part 3: GPU (thread computes 2 elements of C) */
 __global__ void matmult_gpu3_kernel(int M, int N, int K, double* A, double* B, double* C, int stride) {
     double temp = 0.0;
-    int i = (blockIdx.x * blockDim.x + threadIdx.x)*stride;
-    int j = blockIdx.y * blockDim.y + threadIdx.y;
+    int j = (blockIdx.x * blockDim.x + threadIdx.x)*stride;
+    int i = blockIdx.y * blockDim.y + threadIdx.y;
 
     for (int s = 0; s < stride; s++) { // does right neighbour
         if ((s + i) < M && j < N){ // ensure that the extra threads do not do any work
@@ -207,8 +207,8 @@ void matmult_gpu3(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
 /* part 4: GPU (thread computes >2 elements of C) */
 __global__ void matmult_gpu4_kernel(int M, int N, int K, double* A, double* B, double* C, int stride_row, int stride_col) {
     double temp = 0.0;
-    int i = (blockIdx.x * blockDim.x + threadIdx.x)*stride_row;
-    int j = (blockIdx.y * blockDim.y + threadIdx.y)*stride_col;
+    int j = (blockIdx.x * blockDim.x + threadIdx.x)*stride_row;
+    int i = (blockIdx.y * blockDim.y + threadIdx.y)*stride_col;
 
     for (int s_row = 0; s_row < stride_row; s_row++) {
         for (int s_col = 0; s_col < stride_col; s_col++) {
@@ -273,72 +273,99 @@ void matmult_gpu4(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
     cudaFree(d_C);
 }
 /* part 5: GPU (shared memory version) */
-// Matrices are stored in row-major order:
-// M(row, col) = *(M.elements + row * M.width + col)
-typedef struct {
-    int width;
-    int height;
-    float* elements;
-} Matrix;
 
-// Thread block size
-#define BLOCK_SIZE 16
+__global__ void matmult_gpu5_kernel(int M, int N, int K, double* A, double* B, double* C) {
+    // Each thread computes one element of C
+    // by accumulating results into Cvalue
+    double temp = 0.0;
+    int j = blockIdx.x * blockDim.x + threadIdx.x;
+    int i = blockIdx.y * blockDim.y + threadIdx.y;
 
-// Forward declaration of the matrix multiplication kernel
-__global__ void MatMulKernel(const Matrix, const Matrix, Matrix);
+    if (i < M && j < N){ // ensure that the extra threads do not do any work
+        for (int step = 0; step < K; step++) {
+            temp += A[i*K + step] * B[step*N + j];
+        }
+        C[i*N + j] = temp;
+    }
+}
 
 // Matrix multiplication - Host code
 // Matrix dimensions are assumed to be multiples of BLOCK_SIZE
-void MatMul(const Matrix A, const Matrix B, Matrix C)
+void matmult_gpu5(int M, int N, int K, double* h_A, double* h_B, double* h_C)
 {
-    // Load A and B to device memory
-    Matrix d_A;
-    d_A.width = A.width; d_A.height = A.height;
-    size_t size = A.width * A.height * sizeof(float);
-    cudaMalloc(&d_A.elements, size);
-    cudaMemcpy(d_A.elements, A.elements, size,
-               cudaMemcpyHostToDevice);
-    Matrix d_B;
-    d_B.width = B.width; d_B.height = B.height;
-    size = B.width * B.height * sizeof(float);
-    cudaMalloc(&d_B.elements, size);
-    cudaMemcpy(d_B.elements, B.elements, size,
-               cudaMemcpyHostToDevice);
+    double *d_A, *d_B, *d_C; // Device variables
+    int size_A = M*K*sizeof(double);
+    int size_B = N*K*sizeof(double);
+    int size_C = N*M*sizeof(double);
+    double max_val = 10.0;
 
-    // Allocate C in device memory
-    Matrix d_C;
-    d_C.width = C.width; d_C.height = C.height;
-    size = C.width * C.height * sizeof(float);
-    cudaMalloc(&d_C.elements, size);
+    /* GPU: Allocate memory on device */
+    //printf("Allocating memory... \n");
+    cudaMalloc((void**)&d_A, size_A);
+    cudaMalloc((void**)&d_B, size_B);
+    cudaMalloc((void**)&d_C, size_C);
+
+    /* GPU: Allocate memory on host */
+    cudaMallocHost((void**)&h_A, size_A);
+    cudaMallocHost((void**)&h_B, size_B);
+    cudaMallocHost((void**)&h_C, size_C);
+
+    /* Copying data to device */
+    //printf("Copying data to device... \n");
+    cudaMemcpy(d_A, h_A, size_A, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, h_B, size_B, cudaMemcpyHostToDevice);
 
     // Invoke kernel
+    int BLOCK_SIZE = 16;
     dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
-    dim3 dimGrid(B.width / dimBlock.x, A.height / dimBlock.y);
-    MatMulKernel<<<dimGrid, dimBlock>>>(d_A, d_B, d_C);
+    dim3 dimGrid(N / dimBlock.x, M / dimBlock.y);
+    MatMulKernel<<<dimGrid, dimBlock>>>(M, N, K, d_A, d_B, d_C);
+    cudaDeviceSynchronize();
 
-    // Read C from device memory
-    cudaMemcpy(C.elements, d_C.elements, size,
-               cudaMemcpyDeviceToHost);
+    //printf("Copying results back to host... \n");
+    cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
+    cudaDeviceSynchronize();
 
-    // Free device memory
-    cudaFree(d_A.elements);
-    cudaFree(d_B.elements);
-    cudaFree(d_C.elements);
+    /* Freeing memory */
+    //printf("Freeing memory... \n");
+    cudaFreeHost(h_A);
+    cudaFreeHost(h_B);
+    cudaFreeHost(h_C);
+    cudaFree(d_A);
+    cudaFree(d_B);
+    cudaFree(d_C);
 }
 
-// Matrix multiplication kernel called by MatMul()
-__global__ void MatMulKernel(Matrix A, Matrix B, Matrix C)
-{
-    // Each thread computes one element of C
-    // by accumulating results into Cvalue
-    float Cvalue = 0;
-    int row = blockIdx.y * blockDim.y + threadIdx.y;
-    int col = blockIdx.x * blockDim.x + threadIdx.x;
-    for (int e = 0; e < A.width; ++e)
-        Cvalue += A.elements[row * A.width + e]
-                * B.elements[e * B.width + col];
-    C.elements[row * C.width + col] = Cvalue;
-}
+
 /* part 6: DGEMM function for GPUs, NVIDIA */
+void matmult_gpulib(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
+
+    /* Declare handle and initialize cublas */
+    cublasHandle_t handle;
+    cublasStatus_t status = cublasCreate(&handle);
+    if (status != CUBLAS_STATUS_SUCCESS) { // check if init successful
+        printf("Error: Initialization error CUBLAS. \n");
+        exit(1);
+    }
+
+    double alpha = 1.0; // no prefactor
+    double beta = 0.0; // C matrix not involved
+
+    
+    status = cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha, h_A, M, h_B, N, &beta, h_C, K);
+    if (status != CUBLAS_STATUS_SUCCESS) { // check no errors are outputed in the execution
+        printf("Error: Execution error CUBLAS. \n");
+        exit(1);
+    }
+
+    /* Destroy handle and free memory */
+    status = cublasDestroy(handle);
+    if (status != CUBLAS_STATUS_SUCCESS) {
+        printf("Error: Error destroying CUBLAS handle. \n");
+        exit(1);
+    }
+
+
+}
 
 }
