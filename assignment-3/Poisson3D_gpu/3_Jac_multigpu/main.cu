@@ -88,7 +88,8 @@ int main(int argc, char *argv[]){
 
     double *d_u, *d_uOld, *d_f, *d1_u, *d1_uOld, *d1_f;
     double *h_u, *h_uOld, *h_f;
-    double size = N * N * N * sizeof(double);
+    int size = N * N * N * sizeof(double);
+    int half_size = size/2;
     // Pinning memory in host
     cudaMallocHost((void**)&h_u, size);
     cudaMallocHost((void**)&h_uOld, size);
@@ -103,27 +104,27 @@ int main(int argc, char *argv[]){
     cudaSetDevice(0);
 
     // Device memory allocation 
-    cudaMalloc((void**)&d_u, size/2);
-    cudaMalloc((void**)&d_uOld, size/2);
-    cudaMalloc((void**)&d_f, size/2);
+    cudaMalloc((void**)&d_u, half_size);
+    cudaMalloc((void**)&d_uOld, half_size);
+    cudaMalloc((void**)&d_f, half_size);
 
     // Copy initializationf from host to device
-    cudaMemcpy(d_u, h_u, size/2, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_uOld, h_uOld, size/2, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_f, h_f, size/2, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_u, h_u, half_size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_uOld, h_uOld, half_size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_f, h_f, half_size, cudaMemcpyHostToDevice);
 
     // Device 1
     cudaSetDevice(1);
 
     // Device memory allocation 
-    cudaMalloc((void**)&d1_u, size/2);
-    cudaMalloc((void**)&d1_uOld, size/2);
-    cudaMalloc((void**)&d1_f, size/2);
+    cudaMalloc((void**)&d1_u, half_size);
+    cudaMalloc((void**)&d1_uOld, half_size);
+    cudaMalloc((void**)&d1_f, half_size);
 
     // Copy initializationf from host to device
-    cudaMemcpy(d1_u, h_u + N*N*N/2, size/2, cudaMemcpyHostToDevice);
-    cudaMemcpy(d1_uOld, h_uOld + N*N*N/2, size/2, cudaMemcpyHostToDevice);
-    cudaMemcpy(d1_f, h_f + N*N*N/2, size/2, cudaMemcpyHostToDevice);
+    cudaMemcpy(d1_u, h_u + N*N*N/2, half_size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d1_uOld, h_uOld + N*N*N/2, half_size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d1_f, h_f + N*N*N/2, half_size, cudaMemcpyHostToDevice);
    
     // Enable peer access
     cudaSetDevice(0);
@@ -157,10 +158,15 @@ int main(int argc, char *argv[]){
 
     // Copy back to host
     cudaSetDevice(0);
-    cudaMemcpy(h_u, d_u, size/2, cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_u, d_u, half_size, cudaMemcpyDeviceToHost);
     cudaSetDevice(1);
-    cudaMemcpy(h_u + N*N*N/2, d1_u, size/2, cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_u + N*N*N/2, d1_u, half_size, cudaMemcpyDeviceToHost);
 
+    // Disable Peer Access
+    cudaSetDevice(0);
+    cudaDeviceDisablePeerAccess(1);
+    cudaSetDevice(1);
+    cudaDeviceDisablePeerAccess(0);
     // dump  results if wanted
     switch(output_type) {
         case 0:
