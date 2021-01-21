@@ -33,8 +33,8 @@ int main(int argc, char *argv[]){
     double *d_dummy;
     cudaMalloc((void**)&d_dummy,0);
 
-    double *d_u=NULL, *d_uOld=NULL, *d_f=NULL;
-    double *h_u=NULL, *h_uOld=NULL, *h_f=NULL;
+    double *d_u, *d_uOld, *d_f;
+    double *h_u, *h_uOld, *h_f;
     int size = N * N * N * sizeof(double);
 
     // Device memory allocation 

@@ -38,7 +38,7 @@ void matmult_gpu1(int M, int N, int K, double* A, double *B, double* C) {
     double max_val = 10.0;
 
     /* GPU: Allocate memory on device */
-    printf("Allocating memory... \n");
+    //printf("Allocating memory... \n");
     cudaMalloc((void**)&d_A, size_A);
     cudaMalloc((void**)&d_B, size_B);
     cudaMalloc((void**)&d_C, size_C);
@@ -48,39 +48,25 @@ void matmult_gpu1(int M, int N, int K, double* A, double *B, double* C) {
     cudaMallocHost((void**)&h_B, size_B);
     cudaMallocHost((void**)&h_C, size_C);
 
-    /* Initialize matrices with random data (h_A. h_B)*/
-    printf("Initializing matrices... \n");
-    int i, j;
-    for (i = 0; i < M; i++) {
-        for (j = 0; j < K; j++) {
-            h_A[i][j] = (double)rand()*max_val/RAND_MAX;
-        }
-    }
-    for (i = 0; i < K; i++) {
-        for (j = 0; j < N; j++) {
-            h_B[i][j] = (double)rand()*max_val/RAND_MAX;
-        }
-    }
-
     /* Copying data to device */
-    printf("Copying data to device... \n");
+    //printf("Copying data to device... \n");
     cudaMemcpy(d_A, h_A, size_A, cudaMemcpyHostToDevice);
     cudaMemcpy(d_B, h_B, size_B, cudaMemcpyHostToDevice);
 
     /* MATRIX MULTIPLICATION */
-    printf("Computing Matrix multiplication... \n");
+    //printf("Computing Matrix multiplication... \n");
     // Define grid and threads per block
     // declare the number of blocks per grid and the number of threads per block
     // use 1 to 512 threads per block
     matmult_gpu1_kernel<<<1,1>>>(M, N, K, d_A, d_B, d_C);
     cudaDeviceSynchronize();
 
-    printf("Copying results back to host... \n");
+    //printf("Copying results back to host... \n");
     cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
     cudaDeviceSynchronize();
 
     /* Freeing memory */
-    printf("Freeing memory... \n");
+    //printf("Freeing memory... \n");
     cudaFreeHost(h_A);
     cudaFreeHost(h_B);
     cudaFreeHost(h_C);
@@ -111,7 +97,7 @@ void matmult_gpu2(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
     double max_val = 10.0;
 
     /* GPU: Allocate memory on device */
-    printf("Allocating memory... \n");
+    //printf("Allocating memory... \n");
     cudaMalloc((void**)&d_A, size_A);
     cudaMalloc((void**)&d_B, size_B);
     cudaMalloc((void**)&d_C, size_C);
@@ -121,27 +107,13 @@ void matmult_gpu2(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
     cudaMallocHost((void**)&h_B, size_B);
     cudaMallocHost((void**)&h_C, size_C);
 
-    /* Initialize matrices with random data (h_A. h_B)*/
-    printf("Initializing matrices... \n");
-    int i, j;
-    for (i = 0; i < M; i++) {
-        for (j = 0; j < K; j++) {
-            h_A[i][j] = (double)rand()*max_val/RAND_MAX;
-        }
-    }
-    for (i = 0; i < K; i++) {
-        for (j = 0; j < N; j++) {
-            h_B[i][j] = (double)rand()*max_val/RAND_MAX;
-        }
-    }
-
     /* Copying data to device */
-    printf("Copying data to device... \n");
+    //printf("Copying data to device... \n");
     cudaMemcpy(d_A, h_A, size_A, cudaMemcpyHostToDevice);
     cudaMemcpy(d_B, h_B, size_B, cudaMemcpyHostToDevice);
 
     /* MATRIX MULTIPLICATION */
-    printf("Computing Matrix multiplication... \n");
+    //printf("Computing Matrix multiplication... \n");
     // Define grid and threads per block
     // declare the number of blocks per grid and the number of threads per block
     // use 1 to 512 threads per block
@@ -152,12 +124,12 @@ void matmult_gpu2(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
     matmult_gpu2_kernel<<<blocksPerGrid,threadsPerBlock>>>(M, N, K, d_A, d_B, d_C);
     cudaDeviceSynchronize();
 
-    printf("Copying results back to host... \n");
+    //printf("Copying results back to host... \n");
     cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
     cudaDeviceSynchronize();
 
     /* Freeing memory */
-    printf("Freeing memory... \n");
+    //printf("Freeing memory... \n");
     cudaFreeHost(h_A);
     cudaFreeHost(h_B);
     cudaFreeHost(h_C);
@@ -190,7 +162,7 @@ void matmult_gpu3(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
     double max_val = 10.0;
 
     /* GPU: Allocate memory on device */
-    printf("Allocating memory... \n");
+    //printf("Allocating memory... \n");
     cudaMalloc((void**)&d_A, size_A);
     cudaMalloc((void**)&d_B, size_B);
     cudaMalloc((void**)&d_C, size_C);
@@ -200,27 +172,13 @@ void matmult_gpu3(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
     cudaMallocHost((void**)&h_B, size_B);
     cudaMallocHost((void**)&h_C, size_C);
 
-    /* Initialize matrices with random data (h_A. h_B)*/
-    printf("Initializing matrices... \n");
-    int i, j;
-    for (i = 0; i < M; i++) {
-        for (j = 0; j < K; j++) {
-            h_A[i][j] = (double)rand()*max_val/RAND_MAX;
-        }
-    }
-    for (i = 0; i < K; i++) {
-        for (j = 0; j < N; j++) {
-            h_B[i][j] = (double)rand()*max_val/RAND_MAX;
-        }
-    }
-
     /* Copying data to device */
-    printf("Copying data to device... \n");
+    //printf("Copying data to device... \n");
     cudaMemcpy(d_A, h_A, size_A, cudaMemcpyHostToDevice);
     cudaMemcpy(d_B, h_B, size_B, cudaMemcpyHostToDevice);
 
     /* MATRIX MULTIPLICATION */
-    printf("Computing Matrix multiplication... \n");
+    //printf("Computing Matrix multiplication... \n");
     // Define grid and threads per block
     // declare the number of blocks per grid and the number of threads per block
     // use 1 to 512 threads per block
@@ -232,12 +190,12 @@ void matmult_gpu3(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
     matmult_gpu3_kernel<<<blocksPerGrid,threadsPerBlock>>>(M, N, K, d_A, d_B, d_C, stride);
     cudaDeviceSynchronize();
 
-    printf("Copying results back to host... \n");
+    //printf("Copying results back to host... \n");
     cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
     cudaDeviceSynchronize();
 
     /* Freeing memory */
-    printf("Freeing memory... \n");
+    //printf("Freeing memory... \n");
     cudaFreeHost(h_A);
     cudaFreeHost(h_B);
     cudaFreeHost(h_C);
@@ -272,7 +230,7 @@ void matmult_gpu4(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
     double max_val = 10.0;
 
     /* GPU: Allocate memory on device */
-    printf("Allocating memory... \n");
+    //printf("Allocating memory... \n");
     cudaMalloc((void**)&d_A, size_A);
     cudaMalloc((void**)&d_B, size_B);
     cudaMalloc((void**)&d_C, size_C);
@@ -282,27 +240,13 @@ void matmult_gpu4(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
     cudaMallocHost((void**)&h_B, size_B);
     cudaMallocHost((void**)&h_C, size_C);
 
-    /* Initialize matrices with random data (h_A. h_b)*/
-    printf("Initializing matrices... \n");
-    int i, j;
-    for (i = 0; i < M; i++) {
-        for (j = 0; j < K; j++) {
-            h_A[i][j] = (double)rand()*max_val/RAND_MAX;
-        }
-    }
-    for (i = 0; i < K; i++) {
-        for (j = 0; j < N; j++) {
-            h_B[i][j] = (double)rand()*max_val/RAND_MAX;
-        }
-    }
-
     /* Copying data to device */
-    printf("Copying data to device... \n");
+    //printf("Copying data to device... \n");
     cudaMemcpy(d_A, h_A, size_A, cudaMemcpyHostToDevice);
     cudaMemcpy(d_B, h_B, size_B, cudaMemcpyHostToDevice);
 
     /* MATRIX MULTIPLICATION */
-    printf("Computing Matrix multiplication... \n");
+    //printf("Computing Matrix multiplication... \n");
     // Define grid and threads per block
     // declare the number of blocks per grid and the number of threads per block
     // use 1 to 512 threads per block
@@ -315,12 +259,12 @@ void matmult_gpu4(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
     matmult_gpu4_kernel<<<blocksPerGrid,threadsPerBlock>>>(M, N, K, d_A, d_B, d_C, stride_row, stride_col);
     cudaDeviceSynchronize();
 
-    printf("Copying results back to host... \n");
+    //printf("Copying results back to host... \n");
     cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
     cudaDeviceSynchronize();
 
     /* Freeing memory */
-    printf("Freeing memory... \n");
+    //printf("Freeing memory... \n");
     cudaFreeHost(h_A);
     cudaFreeHost(h_B);
     cudaFreeHost(h_C);
