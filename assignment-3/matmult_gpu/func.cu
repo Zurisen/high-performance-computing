@@ -176,9 +176,9 @@ extern "C" {
         if (i < M && j < N) {
             for (int k = 0; k < K; k++) {
                 for (sc = 0; sc < stride_col; sc++) {
-                    if (sc + j < N-1) {
+                    if (sc + j < N) {
                         for (sr = 0; sr < stride_row; sr++) {
-                            if (sr + i < M-1) {
+                            if (sr + i < M) {
                                 temp[sc][sr] += d_A[(i+sr)*K + k] * d_B[k*N + (j+sc)];
                             }
                         }
@@ -186,9 +186,9 @@ extern "C" {
                 }
             }
             for (sc = 0; sc < stride_col; sc++) {
-                if (sc + j < N-1) {
+                if (sc + j < N) {
                     for (sr = 0; sr < stride_row; sr++) {
-                        if (sr + i < M-1) {
+                        if (sr + i < M) {
                             d_C[(i+sr)*N + (j + sc)] = temp[sc][sr];
                         }
                     }
