@@ -112,17 +112,19 @@ extern "C" {
         double temp1 = 0.0;
         double temp2 = 0.0;
 
-        int j = (blockIdx.x * blockDim.x + threadIdx.x);
-        int i = (blockIdx.y * blockDim.y + threadIdx.y)*stride;
+        int i = (blockIdx.x * blockDim.x + threadIdx.x);
+        int j = (blockIdx.y * blockDim.y + threadIdx.y)*stride;
 
         if (i < M && j < N) {
             for (int k = 0; k < K; k++) {
                 temp1 += d_A[(i)*K + k] * d_B[k*N + j];
-                temp2 += d_A[(i+1)*K + k] * d_B[k*N + j]; // right neighbour
+                if (j+1 < N) { // only if not end
+                    temp2 += d_A[(i)*K + k] * d_B[k*N + (j+1)]; // right neighbour
+                }
             }
             d_C[i*N + j] = temp1;
-            if (i+1 < M-1) { // only if not end
-                d_C[(i+1)*N + j] = temp2;
+            if (j+1 < N) { // only if not end
+                d_C[(i)*N + (j+1)] = temp2;
             }
         }
     }
