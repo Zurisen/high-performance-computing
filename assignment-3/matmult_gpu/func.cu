@@ -1,5 +1,5 @@
 // Asignment 3 Part 1 Matrix Multiplication
-
+#include <cublas_v2.h> // for matmult_gpulib()
 extern "C" {
 
 #include <stdio.h>
@@ -319,7 +319,7 @@ void matmult_gpu5(int M, int N, int K, double* h_A, double* h_B, double* h_C)
     int BLOCK_SIZE = 16;
     dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
     dim3 dimGrid(N / dimBlock.x, M / dimBlock.y);
-    MatMulKernel<<<dimGrid, dimBlock>>>(M, N, K, d_A, d_B, d_C);
+    matmult_gpu5_kernel<<<dimGrid, dimBlock>>>(M, N, K, d_A, d_B, d_C);
     cudaDeviceSynchronize();
 
     //printf("Copying results back to host... \n");
@@ -367,5 +367,4 @@ void matmult_gpulib(int M, int N, int K, double* h_A, double* h_B, double* h_C) 
 
 
 }
-
 }
