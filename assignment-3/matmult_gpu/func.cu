@@ -28,8 +28,9 @@ __global__ void matmult_gpu1_kernel(int M, int N, int K, double* A, double *B, d
     }
 }
 
-void matmult_gpu1(int M, int N, int K, double* h_A, double *h_B, double* h_C) {
+void matmult_gpu1(int M, int N, int K, double* A, double *B, double* C) {
     double *d_A, *d_B, *d_C; // Device variables
+    double *h_A, *h_B, *h_C; // Host variables
     int size_A = M*K*sizeof(double);
     int size_B = N*K*sizeof(double);
     int size_C = N*M*sizeof(double);
@@ -47,8 +48,8 @@ void matmult_gpu1(int M, int N, int K, double* h_A, double *h_B, double* h_C) {
 
     /* Copying data to device */
     //printf("Copying data to device... \n");
-    cudaMemcpy(d_A, h_A, size_A, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_B, h_B, size_B, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_A, A, size_A, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, B, size_B, cudaMemcpyHostToDevice);
 
     /* MATRIX MULTIPLICATION */
     //printf("Computing Matrix multiplication... \n");
@@ -86,8 +87,9 @@ __global__ void matmult_gpu2_kernel(int M, int N, int K, double* A, double* B, d
     }
 }
 
-void matmult_gpu2(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
+void matmult_gpu2(int M, int N, int K, double* A, double *B, double* C) {
     double *d_A, *d_B, *d_C; // Device variables
+    double *h_A, *h_B, *h_C; // Host variables
     int size_A = M*K*sizeof(double);
     int size_B = N*K*sizeof(double);
     int size_C = N*M*sizeof(double);
@@ -105,8 +107,8 @@ void matmult_gpu2(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
 
     /* Copying data to device */
     //printf("Copying data to device... \n");
-    cudaMemcpy(d_A, h_A, size_A, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_B, h_B, size_B, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_A, A, size_A, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, B, size_B, cudaMemcpyHostToDevice);
 
     /* MATRIX MULTIPLICATION */
     //printf("Computing Matrix multiplication... \n");
@@ -150,8 +152,9 @@ __global__ void matmult_gpu3_kernel(int M, int N, int K, double* A, double* B, d
     }
 }
 
-void matmult_gpu3(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
+void matmult_gpu3(int M, int N, int K, double* A, double *B, double* C) {
     double *d_A, *d_B, *d_C; // Device variables
+    double *h_A, *h_B, *h_C; // Host variables
     int size_A = M*K*sizeof(double);
     int size_B = N*K*sizeof(double);
     int size_C = N*M*sizeof(double);
@@ -169,8 +172,8 @@ void matmult_gpu3(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
 
     /* Copying data to device */
     //printf("Copying data to device... \n");
-    cudaMemcpy(d_A, h_A, size_A, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_B, h_B, size_B, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_A, A, size_A, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, B, size_B, cudaMemcpyHostToDevice);
 
     /* MATRIX MULTIPLICATION */
     //printf("Computing Matrix multiplication... \n");
@@ -217,8 +220,9 @@ __global__ void matmult_gpu4_kernel(int M, int N, int K, double* A, double* B, d
     }
 }
 
-void matmult_gpu4(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
+void matmult_gpu4(int M, int N, int K, double* A, double *B, double* C) {
     double *d_A, *d_B, *d_C; // Device variables
+    double *h_A, *h_B, *h_C; // Host variables
     int size_A = M*K*sizeof(double);
     int size_B = N*K*sizeof(double);
     int size_C = N*M*sizeof(double);
@@ -236,8 +240,8 @@ void matmult_gpu4(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
 
     /* Copying data to device */
     //printf("Copying data to device... \n");
-    cudaMemcpy(d_A, h_A, size_A, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_B, h_B, size_B, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_A, A, size_A, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, B, size_B, cudaMemcpyHostToDevice);
 
     /* MATRIX MULTIPLICATION */
     //printf("Computing Matrix multiplication... \n");
@@ -288,6 +292,7 @@ __global__ void matmult_gpu5_kernel(int M, int N, int K, double* A, double* B, d
 void matmult_gpu5(int M, int N, int K, double* h_A, double* h_B, double* h_C)
 {
     double *d_A, *d_B, *d_C; // Device variables
+    double *h_A, *h_B, *h_C; // Host variables
     int size_A = M*K*sizeof(double);
     int size_B = N*K*sizeof(double);
     int size_C = N*M*sizeof(double);
@@ -305,8 +310,8 @@ void matmult_gpu5(int M, int N, int K, double* h_A, double* h_B, double* h_C)
 
     /* Copying data to device */
     //printf("Copying data to device... \n");
-    cudaMemcpy(d_A, h_A, size_A, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_B, h_B, size_B, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_A, A, size_A, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, B, size_B, cudaMemcpyHostToDevice);
 
     // Invoke kernel
     int BLOCK_SIZE = 16;
@@ -331,7 +336,7 @@ void matmult_gpu5(int M, int N, int K, double* h_A, double* h_B, double* h_C)
 
 
 /* part 6: DGEMM function for GPUs, NVIDIA */
-void matmult_gpulib(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
+void matmult_gpulib(int M, int N, int K, double* A, double *B, double* C) {
 
     /* Declare handle and initialize cublas */
     cublasHandle_t handle;
@@ -345,7 +350,7 @@ void matmult_gpulib(int M, int N, int K, double* h_A, double* h_B, double* h_C) 
     double beta = 0.0; // C matrix not involved
 
     
-    status = cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha, h_A, M, h_B, N, &beta, h_C, K);
+    status = cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha, A, M, B, N, &beta, C, K);
     if (status != CUBLAS_STATUS_SUCCESS) { // check no errors are outputed in the execution
         printf("Error: Execution error CUBLAS. \n");
         exit(1);
