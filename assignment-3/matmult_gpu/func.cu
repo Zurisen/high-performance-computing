@@ -28,14 +28,11 @@ __global__ void matmult_gpu1_kernel(int M, int N, int K, double* A, double *B, d
     }
 }
 
-void matmult_gpu1(int M, int N, int K, double* A, double *B, double* C) {
-    
+void matmult_gpu1(int M, int N, int K, double* h_A, double *h_B, double* h_C) {
     double *d_A, *d_B, *d_C; // Device variables
-    double *h_A, *h_B, *h_C; // host vairables
     int size_A = M*K*sizeof(double);
     int size_B = N*K*sizeof(double);
     int size_C = N*M*sizeof(double);
-    double max_val = 10.0;
 
     /* GPU: Allocate memory on device */
     //printf("Allocating memory... \n");
@@ -94,7 +91,6 @@ void matmult_gpu2(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
     int size_A = M*K*sizeof(double);
     int size_B = N*K*sizeof(double);
     int size_C = N*M*sizeof(double);
-    double max_val = 10.0;
 
     /* GPU: Allocate memory on device */
     //printf("Allocating memory... \n");
@@ -159,7 +155,6 @@ void matmult_gpu3(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
     int size_A = M*K*sizeof(double);
     int size_B = N*K*sizeof(double);
     int size_C = N*M*sizeof(double);
-    double max_val = 10.0;
 
     /* GPU: Allocate memory on device */
     //printf("Allocating memory... \n");
@@ -227,7 +222,6 @@ void matmult_gpu4(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
     int size_A = M*K*sizeof(double);
     int size_B = N*K*sizeof(double);
     int size_C = N*M*sizeof(double);
-    double max_val = 10.0;
 
     /* GPU: Allocate memory on device */
     //printf("Allocating memory... \n");
@@ -297,7 +291,6 @@ void matmult_gpu5(int M, int N, int K, double* h_A, double* h_B, double* h_C)
     int size_A = M*K*sizeof(double);
     int size_B = N*K*sizeof(double);
     int size_C = N*M*sizeof(double);
-    double max_val = 10.0;
 
     /* GPU: Allocate memory on device */
     //printf("Allocating memory... \n");
