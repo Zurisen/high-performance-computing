@@ -4,6 +4,8 @@
 #include "alloc3d_gpu.h"
 #include "func.h"
 #include "print.h"
+#include <omp.h>
+
 __global__ void kernel(int N, double *uOld, double *uNew, double *f, double delta_square)
 {
 
@@ -44,32 +46,28 @@ int main(int argc, char *argv[]){
     double *d_dummy;
     cudaMalloc((void**)&d_dummy,0);
 
-    double *d_u, *d_uOld, *d_uSwap, *d_f;
-    double *h_u, *h_uOld, *h_uSwap, *h_f;
+    double *d_u, *d_uOld, *d_f;
+    double *h_u, *h_uOld, *h_f;
     double size = N * N * N * sizeof(double);
 
     // Device memory allocation 
     cudaMalloc((void**)&d_u, size);
     cudaMalloc((void**)&d_uOld, size);
-    cudaMalloc((void**)&d_uSwap, size);
     cudaMalloc((void**)&d_f, size);
 
     // Pinning memory in host
     cudaMallocHost((void**)&h_u, size);
     cudaMallocHost((void**)&h_uOld, size);
-    cudaMallocHost((void**)&h_uSwap, size);
     cudaMallocHost((void**)&h_f, size);
 
     // Initialization of the arrays
     u_init(h_u, N, N2, start_T); 
     u_init(h_uOld, N, N2, start_T); 
-    u_init(h_uSwap, N, N2, start_T); 
     f_init(h_f, N, N2);
 
     // Copy initializationf from host to device
     cudaMemcpy(d_u, h_u, size, cudaMemcpyHostToDevice);
     cudaMemcpy(d_uOld, h_uOld, size, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_uSwap, h_uSwap, size, cudaMemcpyHostToDevice);
     cudaMemcpy(d_f, h_f, size, cudaMemcpyHostToDevice);
 
     // kernel settings
@@ -84,28 +82,16 @@ int main(int argc, char *argv[]){
         cudaEventCreate(&stop);
     
     int it = 0;
-    float elapsed=0, cycle;
+    double ts = omp_get_wtime();
     while(it < iter_max){
 
-        cudaEventRecord(start,0);
-
-        d_uOld = d_u;   
+	    swap(d_uOld,d_u);
         jacobi_v1<<<1, 1>>>(d_u, d_uOld, d_f, N, N2, iter_max, frac, delta2);
         cudaDeviceSynchronize();
         
         it++;
-
-
-        cudaEventRecord(stop,0);
-        cudaEventSynchronize(stop);
-        cudaEventElapsedTime(&cycle, start, stop);
-        elapsed += cycle;
     }
-    
-
-    
-    printf("Operation finished!  GPU runtime (ms): %3.6f\n\n", elapsed);
-
+    double te = omp_get_wtime()-ts;
     // Copy back to host
     cudaMemcpy(h_u, d_u, size, cudaMemcpyDeviceToHost);
 
@@ -125,16 +111,23 @@ int main(int argc, char *argv[]){
             break;
     }
 
+    // Calculate effective bandwidth
+    double efBW = N*N*N*sizeof(double)*4*it/te/1e3;
+       // 4 -> read uold, f | read and write u
+    // Calculate it/s
+    double itpersec  = it/te;
+    int kbytes = N*N*N*sizeof(double)*3/1000;
+    //print info
+    printf("%d %d %3.6f %3.6f %3.6f %3.6f\n", N, it, te, itpersec, kbytes, efBW);
+
     //Free host and device memory    
     cudaFreeHost(h_f);
     cudaFreeHost(h_u);
     cudaFreeHost(h_uOld);
-    cudaFreeHost(h_uSwap);
     
     cudaFreeHost(d_f);
     cudaFreeHost(d_u);
     cudaFreeHost(d_uOld);
-    cudaFreeHost(d_uSwap);
    
     return(0); 
 }

@@ -13,7 +13,7 @@ module load gcc/9.2.0
 OUTFILE="results.txt"
 rm $OUTFILE
 EXECUTABLE=poisson_j
-ITER=10000
+ITER=1000
 START_T=10
 TOLERANCE=10
 

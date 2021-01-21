@@ -82,10 +82,9 @@ int main(int argc, char *argv[]){
         cudaEventCreate(&stop);
     
     int it = 0;
-    float elapsed=0, cycle;
+    double ts = omp_get_wtime();
     while(it < iter_max && *h_norm>tolerance){
         *h_norm = 0;   
-        cudaEventRecord(start,0);
         
         cudaMemcpy(d_norm, h_norm ,norm_size, cudaMemcpyHostToDevice);
         swap(d_uOld,d_u); 
@@ -94,11 +93,8 @@ int main(int argc, char *argv[]){
         cudaDeviceSynchronize();
         it++;
        
-        cudaEventRecord(stop,0);
-        cudaEventSynchronize(stop);
-        cudaEventElapsedTime(&cycle, start, stop);
-        elapsed += cycle;
     }
+    double te = omp_get_wtime() - ts;
     // Copy back to host
     cudaMemcpy(h_u, d_u, size, cudaMemcpyDeviceToHost);
 
@@ -119,11 +115,13 @@ int main(int argc, char *argv[]){
     }
 
     // Calculate effective bandwidth
-    double efBW = N*N*N*sizeof(double)*5*it/elapsed/1e6; 
-       // 5 -> read uold, uswap, f | read and write u 
-    
+    double efBW = N*N*N*sizeof(double)*4*it/te/1e3;
+       // 4 -> read uold, f | read and write u
+    // Calculate it/s
+    double itpersec  = it/te;
+    int kbytes = N*N*N*sizeof(double)*3/1000;
     //print info
-    printf("%d %d %3.6f %3.6f\n", N, it, elapsed,efBW);
+    printf("%d %d %3.6f %3.6f %3.6f %3.6f\n", N, it, te, itpersec, kbytes, efBW);
 
     //Free host and device memory    
     cudaFreeHost(h_f);

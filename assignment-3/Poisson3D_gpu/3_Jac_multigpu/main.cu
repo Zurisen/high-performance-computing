@@ -4,6 +4,7 @@
 #include "alloc3d_gpu.h"
 #include "func.h"
 #include "print.h"
+#include <omp.h>
 
 __global__ void jacobi_v3_dv0(double *d_u, double *d_uOld, double *d1_uOld, double *d_f, \
     double frac, double delta2, int N, int N2) {
@@ -140,6 +141,7 @@ int main(int argc, char *argv[]){
     double delta2 = (2.0*2.0)/N2;
     
     int it = 0;
+    double ts = omp_get_wtime();
     while(it < iter_max){
         swap(d_uOld, d_u);
         swap(d1_uOld, d1_u);    
@@ -155,6 +157,7 @@ int main(int argc, char *argv[]){
         cudaDeviceSynchronize();
         it++;
     }
+    double te = omp_get_wtime() - ts;
 
     // Copy back to host
     cudaSetDevice(0);
@@ -167,6 +170,7 @@ int main(int argc, char *argv[]){
     cudaDeviceDisablePeerAccess(1);
     cudaSetDevice(1);
     cudaDeviceDisablePeerAccess(0);
+    
     // dump  results if wanted
     switch(output_type) {
         case 0:
@@ -182,7 +186,16 @@ int main(int argc, char *argv[]){
             fprintf(stderr, "Non-supported output type!\n");
             break;
     }
-
+    
+    // Calculate effective bandwidth
+    double efBW = N*N*N*sizeof(double)*4*it/te/1e3;
+       // 4 -> read uold, f | read and write u
+    // Calculate it/s
+    double itpersec  = it/te;
+    int kbytes = N*N*N*sizeof(double)*3/1000;
+    //print info
+    printf("%d %d %3.6f %3.6f %3.6f %3.6f\n", N, it, te, itpersec, kbytes, efBW);
+    
     //Free host and device memory    
     cudaFreeHost(h_f);
     cudaFreeHost(h_u);
@@ -194,8 +207,6 @@ int main(int argc, char *argv[]){
     cudaFree(d1_f);
     cudaFree(d1_u);
     cudaFree(d1_uOld);
-    
-
    
     return(0); 
 }
