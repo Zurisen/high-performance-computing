@@ -1,0 +1,8 @@
+128 1 89.163261 0.940814
+==PROF== Connected to process 32015 (/zhome/7b/f/153842/high-performance-computing/assignment-3/Poisson3D_gpu/2_Jac_onethread/poisson_j)
+==ERROR== Error: Failed to prepare kernel for profiling
+==ERROR== Failed to profile kernel "jacobi_v1" in process 32015
+==PROF== Disconnected from process 32015
+==ERROR== An error occurred while trying to profile.
+==WARNING== No kernels were profiled.
+==WARNING== Profiling kernels launched by child processes requires the --target-processes all option.
