@@ -33,37 +33,33 @@ int main(int argc, char *argv[]){
     double *d_dummy;
     cudaMalloc((void**)&d_dummy,0);
 
-    double *d_u, *d_uOld, *d_uSwap, *d_f;
-    double *h_u, *h_uOld, *h_uSwap, *h_f;
-    double size = N * N * N * sizeof(double);
+    double *d_u=NULL, *d_uOld=NULL, *d_f=NULL;
+    double *h_u=NULL, *h_uOld=NULL, *h_f=NULL;
+    int size = N * N * N * sizeof(double);
 
     // Device memory allocation 
     cudaMalloc((void**)&d_u, size);
     cudaMalloc((void**)&d_uOld, size);
-    cudaMalloc((void**)&d_uSwap, size);
     cudaMalloc((void**)&d_f, size);
 
     // Pinning memory in host
     cudaMallocHost((void**)&h_u, size);
     cudaMallocHost((void**)&h_uOld, size);
-    cudaMallocHost((void**)&h_uSwap, size);
     cudaMallocHost((void**)&h_f, size);
 
     // Initialization of the arrays
     u_init(h_u, N, N2, start_T); 
     u_init(h_uOld, N, N2, start_T); 
-    u_init(h_uSwap, N, N2, start_T); 
     f_init(h_f, N, N2);
 
     // Copy initializationf from host to device
-    cudaMemcpyAsync(d_u, h_u, size, cudaMemcpyHostToDevice);
-    cudaMemcpyAsync(d_uOld, h_uOld, size, cudaMemcpyHostToDevice);
-    cudaMemcpyAsync(d_uSwap, h_uSwap, size, cudaMemcpyHostToDevice);
-    cudaMemcpyAsync(d_f, h_f, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_u, h_u, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_uOld, h_uOld, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_f, h_f, size, cudaMemcpyHostToDevice);
 
     // kernel settings
-    dim3 blocksize(10,10,10);
-    dim3 gridsize( ceil((double) N/blocksize.x),ceil((double) N/blocksize.y),ceil((double) N/blocksize.z) );
+    dim3 blocksize(8,8,8);
+    dim3 gridsize( ceil((int) N/blocksize.x),ceil((int) N/blocksize.y),ceil((int) N/blocksize.z) );
     // Jacobi max iterations loop in host
     double frac = 1.0/6.0;
     double delta2 = (2.0*2.0)/N2;
@@ -77,10 +73,8 @@ int main(int argc, char *argv[]){
     while(it < iter_max){
     
         cudaEventRecord(start,0);
-       
-        d_uSwap = d_uOld;
-        d_u = d_uOld;
-        d_uOld = d_uSwap;   
+        
+        swap(&d_uOld,&d_u); 
         jacobi_v1<<<gridsize,blocksize>>>(d_u, d_uOld, d_f, N, N2, iter_max, frac, delta2);
         cudaDeviceSynchronize();
         it++;
@@ -120,12 +114,10 @@ int main(int argc, char *argv[]){
     cudaFreeHost(h_f);
     cudaFreeHost(h_u);
     cudaFreeHost(h_uOld);
-    cudaFreeHost(h_uSwap);
     
     cudaFreeHost(d_f);
     cudaFreeHost(d_u);
     cudaFreeHost(d_uOld);
-    cudaFreeHost(d_uSwap);
    
     return(0); 
 }

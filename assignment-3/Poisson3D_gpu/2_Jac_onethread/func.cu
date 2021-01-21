@@ -46,3 +46,9 @@ void f_init(double *f, int N, int N2) {
         }
     }
 }
+
+void swap(double **uOld, double **u){
+     double * uSwap = *uOld;
+    *uOld = *u;
+    *u = uSwap;
+ }

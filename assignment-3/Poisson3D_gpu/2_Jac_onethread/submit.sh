@@ -17,7 +17,7 @@ ITER=10000
 START_T=10
 
 
-for i in 50 100 125 150 175 200
+for i in 64 128 256
 do
     ./poisson_j $i $ITER $START_T >> $OUTFILE
 done
