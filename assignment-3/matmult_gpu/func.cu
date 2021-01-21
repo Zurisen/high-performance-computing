@@ -16,7 +16,7 @@ void matmult_lib(int M, int N, int K, double *A, double *B, double *C) {
 
 /* part 1: sequential implementation in GPU (single thread) */
 __global__ void matmult_gpu1_kernel(int M, int N, int K, double* A, double *B, double* C) {
-    double temp = 0;
+    double temp = 0.0;
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -77,7 +77,7 @@ void matmult_gpu1(int M, int N, int K, double* A, double *B, double* C) {
 
 /* part 2: naive implementation in GPU (one thread per element in C) */
 __global__ void matmult_gpu2_kernel(int M, int N, int K, double* A, double* B, double* C) {
-    double temp = 0;
+    double temp = 0.0;
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -140,7 +140,7 @@ void matmult_gpu2(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
 
 /* part 3: GPU (thread computes 2 elements of C) */
 __global__ void matmult_gpu3_kernel(int M, int N, int K, double* A, double* B, double* C, int stride) {
-    double temp = 0;
+    double temp = 0.0;
     int i = (blockIdx.x * blockDim.x + threadIdx.x)*stride;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -206,7 +206,7 @@ void matmult_gpu3(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
 
 /* part 4: GPU (thread computes >2 elements of C) */
 __global__ void matmult_gpu4_kernel(int M, int N, int K, double* A, double* B, double* C, int stride_row, int stride_col) {
-    double temp = 0;
+    double temp = 0.0;
     int i = (blockIdx.x * blockDim.x + threadIdx.x)*stride_row;
     int j = (blockIdx.y * blockDim.y + threadIdx.y)*stride_col;
 
@@ -273,7 +273,72 @@ void matmult_gpu4(int M, int N, int K, double* h_A, double* h_B, double* h_C) {
     cudaFree(d_C);
 }
 /* part 5: GPU (shared memory version) */
+// Matrices are stored in row-major order:
+// M(row, col) = *(M.elements + row * M.width + col)
+typedef struct {
+    int width;
+    int height;
+    float* elements;
+} Matrix;
 
+// Thread block size
+#define BLOCK_SIZE 16
+
+// Forward declaration of the matrix multiplication kernel
+__global__ void MatMulKernel(const Matrix, const Matrix, Matrix);
+
+// Matrix multiplication - Host code
+// Matrix dimensions are assumed to be multiples of BLOCK_SIZE
+void MatMul(const Matrix A, const Matrix B, Matrix C)
+{
+    // Load A and B to device memory
+    Matrix d_A;
+    d_A.width = A.width; d_A.height = A.height;
+    size_t size = A.width * A.height * sizeof(float);
+    cudaMalloc(&d_A.elements, size);
+    cudaMemcpy(d_A.elements, A.elements, size,
+               cudaMemcpyHostToDevice);
+    Matrix d_B;
+    d_B.width = B.width; d_B.height = B.height;
+    size = B.width * B.height * sizeof(float);
+    cudaMalloc(&d_B.elements, size);
+    cudaMemcpy(d_B.elements, B.elements, size,
+               cudaMemcpyHostToDevice);
+
+    // Allocate C in device memory
+    Matrix d_C;
+    d_C.width = C.width; d_C.height = C.height;
+    size = C.width * C.height * sizeof(float);
+    cudaMalloc(&d_C.elements, size);
+
+    // Invoke kernel
+    dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
+    dim3 dimGrid(B.width / dimBlock.x, A.height / dimBlock.y);
+    MatMulKernel<<<dimGrid, dimBlock>>>(d_A, d_B, d_C);
+
+    // Read C from device memory
+    cudaMemcpy(C.elements, d_C.elements, size,
+               cudaMemcpyDeviceToHost);
+
+    // Free device memory
+    cudaFree(d_A.elements);
+    cudaFree(d_B.elements);
+    cudaFree(d_C.elements);
+}
+
+// Matrix multiplication kernel called by MatMul()
+__global__ void MatMulKernel(Matrix A, Matrix B, Matrix C)
+{
+    // Each thread computes one element of C
+    // by accumulating results into Cvalue
+    float Cvalue = 0;
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
+    for (int e = 0; e < A.width; ++e)
+        Cvalue += A.elements[row * A.width + e]
+                * B.elements[e * B.width + col];
+    C.elements[row * C.width + col] = Cvalue;
+}
 /* part 6: DGEMM function for GPUs, NVIDIA */
 
 }
