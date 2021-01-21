@@ -10,6 +10,8 @@ extern "C" {
 
     #define stride_col 2
     #define stride_row 2
+    #define stride 2
+    #define BLOCK_SIZE 16
 
     /* Native CBLAS CPU implementation of matrix multiplication */
     void matmult_lib(int M, int N, int K, double *A, double *B, double *C) {
@@ -91,7 +93,6 @@ extern "C" {
 
         /* MATRIX MULTIPLICATION */
         // Define grid and threads per block
-        int BLOCK_SIZE = 16;
         dim3 blocksPerGrid(((N-1) / BLOCK_SIZE+1), ((M-1) / BLOCK_SIZE+1));
         dim3 threadsPerBlock(BLOCK_SIZE, BLOCK_SIZE);
 
@@ -107,7 +108,7 @@ extern "C" {
     }
 
     /* part 3: GPU (thread computes 2 elements of C) */
-    __global__ void matmult_gpu3_kernel(int M, int N, int K, double* d_A, double* d_B, double* d_C, int stride) {
+    __global__ void matmult_gpu3_kernel(int M, int N, int K, double* d_A, double* d_B, double* d_C) {
         double temp1 = 0.0;
         double temp2 = 0.0;
 
@@ -143,12 +144,10 @@ extern "C" {
 
         /* MATRIX MULTIPLICATION */
         // Define grid and threads per block
-        int BLOCK_SIZE = 16;
-        int stride = 2;
-        dim3 blocksPerGrid(ceil(N/BLOCK_SIZE)+1, ceil(M/BLOCK_SIZE/stride)+1);
+        dim3 blocksPerGrid(ceil(N/BLOCK_SIZE)+1, ceil(M/BLOCK_SIZE*stride)+1);
         dim3 threadsPerBlock(BLOCK_SIZE, BLOCK_SIZE);
 
-        matmult_gpu3_kernel<<<blocksPerGrid,threadsPerBlock>>>(M, N, K, d_A, d_B, d_C, stride);
+        matmult_gpu3_kernel<<<blocksPerGrid,threadsPerBlock>>>(M, N, K, d_A, d_B, d_C);
         cudaDeviceSynchronize();
 
         cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
@@ -213,10 +212,7 @@ extern "C" {
 
         /* MATRIX MULTIPLICATION */
         // Define grid and threads per block
-        // declare the number of blocks per grid and the number of threads per block
-        // use 1 to 512 threads per block
-        int BLOCK_SIZE = 16;
-        dim3 blocksPerGrid(ceil(N/BLOCK_SIZE/stride_col)+1, ceil(M/BLOCK_SIZE/stride_row)+1);
+        dim3 blocksPerGrid(ceil(N/BLOCK_SIZE*stride_col)+1, ceil(M/BLOCK_SIZE*stride_row)+1);
         dim3 threadsPerBlock(BLOCK_SIZE, BLOCK_SIZE);
 
         matmult_gpu4_kernel<<<blocksPerGrid,threadsPerBlock>>>(M, N, K, d_A, d_B, d_C);
@@ -266,7 +262,6 @@ extern "C" {
         cudaMemcpy(d_B, h_B, size_B, cudaMemcpyHostToDevice);
 
         // Invoke kernel
-        int BLOCK_SIZE = 16;
         dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
         dim3 dimGrid(N / dimBlock.x, M / dimBlock.y);
         matmult_gpu5_kernel<<<dimGrid, dimBlock>>>(M, N, K, d_A, d_B, d_C);
