@@ -185,11 +185,10 @@ extern "C" {
                 }
             }
             for (sc = 0; sc < stride_col; sc++) {
-                    if (sc + j < N-1) {
-                        for (sr = 0; sr < stride_row; sr++) {
-                            if (sr + i < M-1) {
-                                d_C[(i+sr)*N + (j + sc)] = temp[sc][sr];
-                            }
+                if (sc + j < N-1) {
+                    for (sr = 0; sr < stride_row; sr++) {
+                        if (sr + i < M-1) {
+                            d_C[(i+sr)*N + (j + sc)] = temp[sc][sr];
                         }
                     }
                 }
