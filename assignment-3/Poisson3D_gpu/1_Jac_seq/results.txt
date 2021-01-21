@@ -1,15 +1,2 @@
-size(N) iter time(total) iter/s memory(kBytes)
-Operation finished!  GPU runtime (ms): 1.688640
-
-Operation finished!  GPU runtime (ms): 15.761569
-
-Operation finished!  GPU runtime (ms): 245.966995
-
-Operation finished!  GPU runtime (ms): 643.801453
-
-Operation finished!  GPU runtime (ms): 1302.384521
-
-Operation finished!  GPU runtime (ms): 3829.764404
-
-Operation finished!  GPU runtime (ms): 6979.389160
+Operation finished!  GPU runtime (ms): 325708.250000
 

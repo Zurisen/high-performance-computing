@@ -182,9 +182,14 @@ int main(int argc, char *argv[]){
     cudaFreeHost(h_u);
     cudaFreeHost(h_uOld);
     
-    cudaFreeHost(d_f);
-    cudaFreeHost(d_u);
-    cudaFreeHost(d_uOld);
+    cudaFree(d_f);
+    cudaFree(d_u);
+    cudaFree(d_uOld);
+    cudaFree(d1_f);
+    cudaFree(d1_u);
+    cudaFree(d1_uOld);
+    
+
    
     return(0); 
 }

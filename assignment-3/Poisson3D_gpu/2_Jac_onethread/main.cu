@@ -12,7 +12,7 @@ __global__ void jacobi_v1(double *d_u, double *d_uOld, double *d_f, int N, int N
     int k = blockIdx.z * blockDim.z + threadIdx.z;
 
     if (i>0 && i<N-1 && j>0 && j<N-1 && k>0 && k<N-1){
-       	d_u[i*N2+j*N+k]	= frac*(d_uOld[(i-1)*N2+j*N+k]+d_uOld[(i+1)*N2+j*N+k]+d_uOld[i*N2+(j-1)*N+k]+d_uOld[i*N2+(j+1)*N+k]+d_uOld[i*N2+j*N+k-1]+d_uOld[i*N2+j*N+k+1]+delta2*d_f[i*N2+j*N+k]);
+       	d_u[i*N2+j*N+k]	= frac*(d_uOld[(i-1)*N2+j*N+k] + d_uOld[(i+1)*N2+j*N+k]+d_uOld[i*N2+(j-1)*N+k] + d_uOld[i*N2+(j+1)*N+k]+d_uOld[i*N2+j*N+k-1] + d_uOld[i*N2+j*N+k+1]+delta2*d_f[i*N2+j*N+k]);
     }
 }
 
@@ -115,9 +115,9 @@ int main(int argc, char *argv[]){
     cudaFreeHost(h_u);
     cudaFreeHost(h_uOld);
     
-    cudaFreeHost(d_f);
-    cudaFreeHost(d_u);
-    cudaFreeHost(d_uOld);
+    cudaFree(d_f);
+    cudaFree(d_u);
+    cudaFree(d_uOld);
    
     return(0); 
 }
