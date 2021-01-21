@@ -8,6 +8,9 @@ extern "C" {
     #include <omp.h>
     #include <cblas.h> // for matmult_lib()
 
+    #define stride_col 2
+    #define stride_row 2
+
     /* Native CBLAS CPU implementation of matrix multiplication */
     void matmult_lib(int M, int N, int K, double *A, double *B, double *C) {
         double alpha = 1.0, beta = 0.0;
@@ -157,7 +160,7 @@ extern "C" {
     }
 
     /* part 4: GPU (thread computes >2 elements of C) */
-    __global__ void matmult_gpu4_kernel(int M, int N, int K, double* d_A, double* d_B, double* d_C, const int stride_row, const int stride_col) {
+    __global__ void matmult_gpu4_kernel(int M, int N, int K, double* d_A, double* d_B, double* d_C) {
         double temp[stride_col][stride_row];
         int sc, sr;
         for (sc = 0; sc < stride_col; sc++){
@@ -214,12 +217,10 @@ extern "C" {
         // declare the number of blocks per grid and the number of threads per block
         // use 1 to 512 threads per block
         int BLOCK_SIZE = 16;
-        int stride_row = 2;
-        int stride_col = 2;
         dim3 blocksPerGrid(ceil(N/BLOCK_SIZE/stride_col)+1, ceil(M/BLOCK_SIZE/stride_row)+1);
         dim3 threadsPerBlock(BLOCK_SIZE, BLOCK_SIZE);
 
-        matmult_gpu4_kernel<<<blocksPerGrid,threadsPerBlock>>>(M, N, K, d_A, d_B, d_C, stride_row, stride_col);
+        matmult_gpu4_kernel<<<blocksPerGrid,threadsPerBlock>>>(M, N, K, d_A, d_B, d_C);
         cudaDeviceSynchronize();
 
         cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
