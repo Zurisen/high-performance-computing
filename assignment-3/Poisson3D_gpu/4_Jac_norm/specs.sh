@@ -10,15 +10,4 @@
 module load cuda/11.1
 module load gcc/9.2.0
 
-OUTFILE="profile.txt"
-rm $OUTFILE
-EXECUTABLE=poisson_j
-ITER=1
-START_T=10
-
-
-for i in 128
-do
-    nv-nsight-cu-cli ./poisson_j $i $ITER $START_T >> $OUTFILE
-    nsys profile poisson_j $i 1000 $start_T
-done
+/appl/cuda/11.1/samples/bin/x86_64/linux/release/deviceQuery >> specs.txt

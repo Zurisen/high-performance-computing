@@ -5,14 +5,18 @@
 #include "func.h"
 #include "print.h"
 #include <omp.h>
-__global__ void jacobi_v1(double *d_u, double *d_uOld, double *d_f, int N, int N2, int iter_max, double frac, double delta2){
+
+__global__ void jacobi_v1(double *d_u, double *d_uOld, double *d_f, int N, int N2, int iter_max, double frac, double delta2, double *d_norm){
 
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
     int k = blockIdx.z * blockDim.z + threadIdx.z;
-
+    double norm_value;
     if (i>0 && i<N-1 && j>0 && j<N-1 && k>0 && k<N-1){
        	d_u[i*N2+j*N+k]	= frac*(d_uOld[(i-1)*N2+j*N+k] + d_uOld[(i+1)*N2+j*N+k]+d_uOld[i*N2+(j-1)*N+k] + d_uOld[i*N2+(j+1)*N+k]+d_uOld[i*N2+j*N+k-1] + d_uOld[i*N2+j*N+k+1]+delta2*d_f[i*N2+j*N+k]);
+        
+        norm_value = ((d_u[i*N2+j*N+k]-d_uOld[i*N2+j*N+k])*(d_u[i*N2+j*N+k]-d_uOld[i*N2+j*N+k]));
+        atomicAdd(d_norm, norm_value);
     }
 }
 
@@ -21,6 +25,7 @@ int main(int argc, char *argv[]){
     int N = atoi(argv[1]);
     int iter_max = atoi(argv[2]);
     double start_T = atof(argv[3]);
+    double tolerance = atof(argv[4]);
     int output_type = 4;
     char *output_prefix = "poisson_j_gpu1";
     char *output_ext = "";
@@ -36,26 +41,31 @@ int main(int argc, char *argv[]){
     double *d_u, *d_uOld, *d_f;
     double *h_u, *h_uOld, *h_f;
     int size = N * N * N * sizeof(double);
+    double *d_norm, *h_norm;
+    int norm_size = sizeof(double);
 
     // Device memory allocation 
     cudaMalloc((void**)&d_u, size);
     cudaMalloc((void**)&d_uOld, size);
     cudaMalloc((void**)&d_f, size);
-
+    cudaMalloc((void**)&d_norm, norm_size);
     // Pinning memory in host
     cudaMallocHost((void**)&h_u, size);
     cudaMallocHost((void**)&h_uOld, size);
     cudaMallocHost((void**)&h_f, size);
+    cudaMallocHost((void**)&h_norm, norm_size);
 
     // Initialization of the arrays
     u_init(h_u, N, N2, start_T); 
     u_init(h_uOld, N, N2, start_T); 
     f_init(h_f, N, N2);
+    *h_norm = 1000000.0;
 
     // Copy initializationf from host to device
     cudaMemcpy(d_u, h_u, size, cudaMemcpyHostToDevice);
     cudaMemcpy(d_uOld, h_uOld, size, cudaMemcpyHostToDevice);
     cudaMemcpy(d_f, h_f, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_norm, h_norm, norm_size, cudaMemcpyHostToDevice);
 
     // kernel settings
     dim3 blocksize(8,8,8);
@@ -73,12 +83,14 @@ int main(int argc, char *argv[]){
     
     int it = 0;
     float elapsed=0, cycle;
-    while(it < iter_max){
-    
+    while(it < iter_max && *h_norm>tolerance){
+        *h_norm = 0;   
         cudaEventRecord(start,0);
         
+        cudaMemcpy(d_norm, h_norm ,norm_size, cudaMemcpyHostToDevice);
         swap(d_uOld,d_u); 
-        jacobi_v1<<<gridsize,blocksize>>>(d_u, d_uOld, d_f, N, N2, iter_max, frac, delta2);
+        jacobi_v1<<<gridsize,blocksize>>>(d_u, d_uOld, d_f, N, N2, iter_max, frac, delta2, d_norm);
+        cudaMemcpy(h_norm, d_norm ,norm_size, cudaMemcpyDeviceToHost);
         cudaDeviceSynchronize();
         it++;
        
