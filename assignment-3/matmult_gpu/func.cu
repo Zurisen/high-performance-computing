@@ -231,19 +231,31 @@ extern "C" {
 
     /* part 5: GPU (shared memory version) */
 
-    __global__ void matmult_gpu5_kernel(int M, int N, int K, double* A, double* B, double* C) {
-        // Each thread computes one element of C
-        // by accumulating results into Cvalue
+    __global__ void matmult_gpu5_kernel(int M, int N, int K, double* d_A, double* d_B, double* d_C) {
+        double *subC, *subA, *subB;
         double temp = 0.0;
-        int i = blockIdx.x * blockDim.x + threadIdx.x;
-        int j = blockIdx.y * blockDim.y + threadIdx.y;
 
-        if (i < M && j < N){ // ensure that the extra threads do not do any work
-            for (int step = 0; step < K; step++) {
-                temp += A[i*K + step] * B[step*N + j];
+        __shared__ double As[BLOCK_SIZE][BLOCK_SIZE];
+        __shared__ double Bs[BLOCK_SIZE][BLOCK_SIZE];
+        
+        *subC = &d_C[blockIdx.y*BLOCK_SIZE*N + blockIdx.x*BLOCK_SIZE];
+
+        for (int i = 0; i < (K/BLOCK_SIZE); i++) {
+            *subA = &d_A[blockIdx.y*BLOCK_SIZE*K + blockIdx.x*BLOCK_SIZE*i];
+            *subB = &d_B[N*BLOCK_SIZE*i + blockIdx.x*BLOCK_SIZE];
+
+            As[threadIdx.y][threadIdx.x] = subA[threadIdx.y*K + threadIdx.x];
+            Bs[threadIdx.y][threadIdx.x] = subA[threadIdx.y*N + threadIdx.x];
+
+            __syncthreads();
+
+            for (int j = 0; j < BLOCK_SIZE; j++) {
+                temp += As[threadIdx.y][j] * Bs[j][threadIdx.x];
             }
-            C[i*N + j] = temp;
+
+            __syncthreads();
         }
+        subC[threadIdx.y*N + threadIdx.x] = temp;
     }
 
     // Matrix multiplication - Host code
@@ -265,12 +277,11 @@ extern "C" {
 
         // Invoke kernel
         dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
-        dim3 dimGrid(N / dimBlock.x, M / dimBlock.y);
+        dim3 dimGrid((N-1)/BLOCK_SIZE+1, (M-1)/BLOCKSIZE+1);
         matmult_gpu5_kernel<<<dimGrid, dimBlock>>>(M, N, K, d_A, d_B, d_C);
         cudaDeviceSynchronize();
 
         cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
-        cudaDeviceSynchronize();
 
         /* Freeing memory */
         cudaFree(d_A);
