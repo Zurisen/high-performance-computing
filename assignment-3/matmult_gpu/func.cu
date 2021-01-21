@@ -17,14 +17,15 @@ extern "C" {
     /* part 1: sequential implementation in GPU (single thread) */
     __global__ void matmult_gpu1_kernel(int M, int N, int K, double* A, double *B, double* C) {
         double temp = 0.0;
-        int i = blockIdx.x * blockDim.x + threadIdx.x;
-        int j = blockIdx.y * blockDim.y + threadIdx.y;
 
-        if (i < M && j < N){ // ensure that the extra threads do not do any work
-            for (int step = 0; step < K; step++) {
-                temp += A[i*K + step] * B[step*N + j];
+        for (int i = 0; i < M; i++) {
+            for (int j = 0; j < N; j++) {
+                temp = 0.0;
+                for (int k = 0; k < K; k++) {
+                    temp += A[i*K + k] * B[k*N + j];
+                }
+                C[i*N + j] = temp;
             }
-            C[i*N + j] = temp;
         }
     }
 
@@ -49,12 +50,8 @@ extern "C" {
         cudaDeviceSynchronize();
 
         cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
-        cudaDeviceSynchronize();
 
         /* Freeing memory */
-        cudaFreeHost(h_A);
-        cudaFreeHost(h_B);
-        cudaFreeHost(h_C);
         cudaFree(d_A);
         cudaFree(d_B);
         cudaFree(d_C);
@@ -68,9 +65,9 @@ extern "C" {
 
         if (i < M && j < N){ // ensure that the extra threads do not do any work
             for (int step = 0; step < K; step++) {
-                temp += A[i*K + step] * B[step*N + j];
+                temp += A[j*K + step] * B[step*N + i];
             }
-            C[i*N + j] = temp;
+            C[j*N + i] = temp;
         }
     }
 
@@ -92,19 +89,15 @@ extern "C" {
         /* MATRIX MULTIPLICATION */
         // Define grid and threads per block
         int BLOCK_SIZE = 16;
-        dim3 blocksPerGrid(((M-1) / BLOCK_SIZE), ((N-1) / BLOCK_SIZE));
+        dim3 blocksPerGrid(((N-1) / BLOCK_SIZE+1), ((M-1) / BLOCK_SIZE+1));
         dim3 threadsPerBlock(BLOCK_SIZE, BLOCK_SIZE);
 
         matmult_gpu2_kernel<<<blocksPerGrid,threadsPerBlock>>>(M, N, K, d_A, d_B, d_C);
         cudaDeviceSynchronize();
 
         cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
-        cudaDeviceSynchronize();
 
         /* Freeing memory */
-        cudaFreeHost(h_A);
-        cudaFreeHost(h_B);
-        cudaFreeHost(h_C);
         cudaFree(d_A);
         cudaFree(d_B);
         cudaFree(d_C);
@@ -112,16 +105,20 @@ extern "C" {
 
     /* part 3: GPU (thread computes 2 elements of C) */
     __global__ void matmult_gpu3_kernel(int M, int N, int K, double* A, double* B, double* C, int stride) {
-        double temp = 0.0;
-        int i = (blockIdx.x * blockDim.x + threadIdx.x)*stride;
-        int j = blockIdx.y * blockDim.y + threadIdx.y;
+        double temp1 = 0.0;
+        double temp2 = 0.0;
 
-        for (int s = 0; s < stride; s++) { // does right neighbour
-            if ((s + i) < M && j < N){ // ensure that the extra threads do not do any work
-                for (int step = 0; step < K; step++) {
-                    temp += A[(s + i)*K + step] * B[step*N + j];
-                }
-                C[(s + i)*N + j] = temp;
+        int j = (blockIdx.x * blockDim.x + threadIdx.x);
+        int i = (blockIdx.y * blockDim.y + threadIdx.y)*stride;
+
+        if (i < M && j < N) {
+            for (int k = 0; k < K; k++) {
+                temp1 += d_A[(i)*K + k] * d_B[k*N + j];
+                temp2 += d_A[(i+1)*K + k] * d_B[k*N + j]; // right neighbour
+            }
+            d_C[i*N + j] = temp1;
+            if (i+1 < m-1) { // only if not end
+                d_C[(i+1)*N + j] = temp2;
             }
         }
     }
@@ -143,23 +140,17 @@ extern "C" {
 
         /* MATRIX MULTIPLICATION */
         // Define grid and threads per block
-        // declare the number of blocks per grid and the number of threads per block
-        // use 1 to 512 threads per block
         int BLOCK_SIZE = 16;
         int stride = 2;
-        dim3 blocksPerGrid(((M+BLOCK_SIZE-1) / (stride * BLOCK_SIZE)), ((N+BLOCK_SIZE-1) / BLOCK_SIZE));
+        dim3 blocksPerGrid(ceil(N/threadsPerBlock.x)+1, ceil(m/threadsPerBlock.y/stride)+1);
         dim3 threadsPerBlock(BLOCK_SIZE, BLOCK_SIZE);
 
         matmult_gpu3_kernel<<<blocksPerGrid,threadsPerBlock>>>(M, N, K, d_A, d_B, d_C, stride);
         cudaDeviceSynchronize();
 
         cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
-        cudaDeviceSynchronize();
 
         /* Freeing memory */
-        cudaFreeHost(h_A);
-        cudaFreeHost(h_B);
-        cudaFreeHost(h_C);
         cudaFree(d_A);
         cudaFree(d_B);
         cudaFree(d_C);
@@ -167,17 +158,36 @@ extern "C" {
 
     /* part 4: GPU (thread computes >2 elements of C) */
     __global__ void matmult_gpu4_kernel(int M, int N, int K, double* A, double* B, double* C, int stride_row, int stride_col) {
-        double temp = 0.0;
-        int i = (blockIdx.x * blockDim.x + threadIdx.x)*stride_row;
-        int j = (blockIdx.y * blockDim.y + threadIdx.y)*stride_col;
+        double temp[stride_col][stride_row];
+        for (int sc = 0; sc < stride_col; sc++){
+            for (int sr = 0; sr < stride_row; sr++){
+                temp[sc][sr] = 0.0;
+            }
+        }
 
-        for (int s_row = 0; s_row < stride_row; s_row++) {
-            for (int s_col = 0; s_col < stride_col; s_col++) {
-                if ((s_row + i) < M && (j + s_col) < N){ // ensure that the extra threads do not do any work
-                    for (int step = 0; step < K; step++) {
-                        temp += A[(s_row + i)*K + step] * B[step*N + (j + s_col)];
+        int j = (blockIdx.x * blockDim.x + threadIdx.x)*stride_col;
+        int i = (blockIdx.y * blockDim.y + threadIdx.y)*stride_row;
+
+        if (i < M && j < N) {
+            for (int k = 0; k < K; k++) {
+                for (sc = 0; sc < stride_col; sc++) {
+                    if (sc + j < N-1) {
+                        for (sr = 0; sr < stride_row; sr++) {
+                            if (sr + i < M-1) {
+                                temp[sc][sr] += d_A[(i+sr)*K + k] * d_B[k*N + (j+sc)];
+                            }
+                        }
                     }
-                    C[(s_row + i)*N + (j + s_col)] = temp;
+                }
+            }
+            for (sc = 0; sc < stride_col; sc++) {
+                    if (sc + j < N-1) {
+                        for (sr = 0; sr < stride_row; sr++) {
+                            if (sr + i < M-1) {
+                                d_C[(i+sr)*N + (j + sc)] = temp[sc][sr];
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -205,7 +215,7 @@ extern "C" {
         int BLOCK_SIZE = 16;
         int stride_row = 2;
         int stride_col = 2;
-        dim3 blocksPerGrid(((M+BLOCK_SIZE-1) / (stride_row * BLOCK_SIZE)), ((N+BLOCK_SIZE-1) / (stride_col * BLOCK_SIZE)));
+        dim3 blocksPerGrid(ceil(N/BLOCK_SIZE/stride_col)+1, ceil(m/BLOCK_SIZE/stride_row)+1);
         dim3 threadsPerBlock(BLOCK_SIZE, BLOCK_SIZE);
 
         matmult_gpu4_kernel<<<blocksPerGrid,threadsPerBlock>>>(M, N, K, d_A, d_B, d_C, stride_row, stride_col);
@@ -215,9 +225,6 @@ extern "C" {
         cudaDeviceSynchronize();
 
         /* Freeing memory */
-        cudaFreeHost(h_A);
-        cudaFreeHost(h_B);
-        cudaFreeHost(h_C);
         cudaFree(d_A);
         cudaFree(d_B);
         cudaFree(d_C);
@@ -268,9 +275,6 @@ extern "C" {
         cudaDeviceSynchronize();
 
         /* Freeing memory */
-        cudaFreeHost(h_A);
-        cudaFreeHost(h_B);
-        cudaFreeHost(h_C);
         cudaFree(d_A);
         cudaFree(d_B);
         cudaFree(d_C);
