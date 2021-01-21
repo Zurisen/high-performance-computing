@@ -74,7 +74,7 @@ int main(int argc, char *argv[]){
     
         cudaEventRecord(start,0);
         
-        swap(&d_uOld,&d_u); 
+        swap(d_uOld,d_u); 
         jacobi_v1<<<gridsize,blocksize>>>(d_u, d_uOld, d_f, N, N2, iter_max, frac, delta2);
         cudaDeviceSynchronize();
         it++;
