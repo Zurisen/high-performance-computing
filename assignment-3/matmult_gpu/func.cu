@@ -104,7 +104,7 @@ extern "C" {
     }
 
     /* part 3: GPU (thread computes 2 elements of C) */
-    __global__ void matmult_gpu3_kernel(int M, int N, int K, double* A, double* B, double* C, int stride) {
+    __global__ void matmult_gpu3_kernel(int M, int N, int K, double* d_A, double* d_B, double* d_C, int stride) {
         double temp1 = 0.0;
         double temp2 = 0.0;
 
@@ -117,7 +117,7 @@ extern "C" {
                 temp2 += d_A[(i+1)*K + k] * d_B[k*N + j]; // right neighbour
             }
             d_C[i*N + j] = temp1;
-            if (i+1 < m-1) { // only if not end
+            if (i+1 < M-1) { // only if not end
                 d_C[(i+1)*N + j] = temp2;
             }
         }
@@ -142,7 +142,7 @@ extern "C" {
         // Define grid and threads per block
         int BLOCK_SIZE = 16;
         int stride = 2;
-        dim3 blocksPerGrid(ceil(N/threadsPerBlock.x)+1, ceil(m/threadsPerBlock.y/stride)+1);
+        dim3 blocksPerGrid(ceil(N/BLOCK_SIZE)+1, ceil(M/BLOCK_SIZE/stride)+1);
         dim3 threadsPerBlock(BLOCK_SIZE, BLOCK_SIZE);
 
         matmult_gpu3_kernel<<<blocksPerGrid,threadsPerBlock>>>(M, N, K, d_A, d_B, d_C, stride);
@@ -157,10 +157,11 @@ extern "C" {
     }
 
     /* part 4: GPU (thread computes >2 elements of C) */
-    __global__ void matmult_gpu4_kernel(int M, int N, int K, double* A, double* B, double* C, int stride_row, int stride_col) {
+    __global__ void matmult_gpu4_kernel(int M, int N, int K, double* d_A, double* d_B, double* d_C, const int stride_row, const int stride_col) {
         double temp[stride_col][stride_row];
-        for (int sc = 0; sc < stride_col; sc++){
-            for (int sr = 0; sr < stride_row; sr++){
+        int sc, sr;
+        for (sc = 0; sc < stride_col; sc++){
+            for (sr = 0; sr < stride_row; sr++){
                 temp[sc][sr] = 0.0;
             }
         }
@@ -215,7 +216,7 @@ extern "C" {
         int BLOCK_SIZE = 16;
         int stride_row = 2;
         int stride_col = 2;
-        dim3 blocksPerGrid(ceil(N/BLOCK_SIZE/stride_col)+1, ceil(m/BLOCK_SIZE/stride_row)+1);
+        dim3 blocksPerGrid(ceil(N/BLOCK_SIZE/stride_col)+1, ceil(M/BLOCK_SIZE/stride_row)+1);
         dim3 threadsPerBlock(BLOCK_SIZE, BLOCK_SIZE);
 
         matmult_gpu4_kernel<<<blocksPerGrid,threadsPerBlock>>>(M, N, K, d_A, d_B, d_C, stride_row, stride_col);
