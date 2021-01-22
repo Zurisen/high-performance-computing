@@ -39,27 +39,36 @@ extern "C" {
         int size_A = M*K*sizeof(double);
         int size_B = N*K*sizeof(double);
         int size_C = N*M*sizeof(double);
-
+	
+	double start_allocate = omp_get_wtime();
+	
         /* GPU: Allocate memory on device */
         cudaMalloc((void**)&d_A, size_A);
         cudaMalloc((void**)&d_B, size_B);
         cudaMalloc((void**)&d_C, size_C);
 
+	double start_copy = omp_get_wtime();
+
         /* Copying data to device */
         cudaMemcpy(d_A, h_A, size_A, cudaMemcpyHostToDevice);
         cudaMemcpy(d_B, h_B, size_B, cudaMemcpyHostToDevice);
-
+	
+	double start_matmult = omp_get_wtime();
+ 
         /* MATRIX MULTIPLICATION */
         // Define grid and threads per block
         matmult_gpu1_kernel<<<1,1>>>(M, N, K, d_A, d_B, d_C);
         cudaDeviceSynchronize();
-
+	double start_copy_back = omp_get_wtime();
         cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
-
+	
+	double start_free = omp_get_wtime();
         /* Freeing memory */
         cudaFree(d_A);
         cudaFree(d_B);
         cudaFree(d_C);
+	double end_script = omp_get_wtime();
+	printf("%g %g %g %g \n", start_copy - start_allocate, start_matmult - start_copy, start_free - start_matmult, end_script - start_free);
     }
 
     /* part 2: naive implementation in GPU (one thread per element in C) */
@@ -243,33 +252,30 @@ extern "C" {
     #define BLOCKDIM 32
 
     /* part 6: DGEMM function for GPUs, NVIDIA */
-    void matmult_gpulib(int M, int N, int K, double* A, double *B, double* C) {
-
-        /* Declare handle and initialize cublas */
-        cublasHandle_t handle;
-        cublasStatus_t status = cublasCreate(&handle);
-        if (status != CUBLAS_STATUS_SUCCESS) { // check if init successful
-            printf("Error: Initialization error CUBLAS. \n");
-            exit(1);
-        }
-
-        double alpha = 1.0; // no prefactor
-        double beta = 0.0; // C matrix not involved
-
+void matmult_gpulib(int m, int n, int k, double *A, double *B, double *C) {
+    cudaSetDevice(2);
     
-        status = cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha, A, M, B, N, &beta, C, K);
-        if (status != CUBLAS_STATUS_SUCCESS) { // check no errors are outputed in the execution
-            printf("Error: Execution error CUBLAS. \n");
-            exit(1);
-        }
+    cublasHandle_t handle;
+    cublasCreate(&handle);
 
-        /* Destroy handle and free memory */
-        status = cublasDestroy(handle);
-        if (status != CUBLAS_STATUS_SUCCESS) {
-            printf("Error: Error destroying CUBLAS handle. \n");
-            exit(1);
-        }
-    }
+    double alpha = 1.0, beta = 0.0;
+
+    double* d_A, * d_B, * d_C;
+    cudaMalloc((void**) &d_A, m*k * sizeof(double));
+    cudaMalloc((void**) &d_B, k*n * sizeof(double));
+    cudaMalloc((void**) &d_C, m*n * sizeof(double));
+    cudaMemcpy(d_A, A,  m*k * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, B,  k*n * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemset(d_C, 0,  m*n * sizeof(double));
+
+    cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, m, n, k, &alpha, &d_A[0], k, &d_B[0], n, &beta, &d_C[0], n);
+
+    cublasDestroy(handle);
+
+    cudaMemcpy(C, d_C,  m*n * sizeof(double), cudaMemcpyDeviceToHost);
+    cudaFree(d_A); cudaFree(d_B); cudaFree(d_C);
+
+  }    
 
 
 __global__ void kernelFunc_gpu5(int m,int n,int k,double *d_A,double *d_B,double *d_C);
