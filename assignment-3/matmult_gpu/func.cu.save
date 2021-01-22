@@ -12,6 +12,7 @@ extern "C" {
     #define stride_row 2
     #define stride 2
     #define BLOCK_SIZE 16
+    #define BLOCKDIM
 
     /* Native CBLAS CPU implementation of matrix multiplication */
     void matmult_lib(int M, int N, int K, double *A, double *B, double *C) {
@@ -112,30 +113,20 @@ extern "C" {
         double temp1 = 0.0;
         double temp2 = 0.0;
 
-        int i = (blockIdx.x * blockDim.x + threadIdx.x); //*stride; // right
-        int j = (blockIdx.y * blockDim.y + threadIdx.y)*stride; // below
+        int i = (blockIdx.x * blockDim.x + threadIdx.x);
+        int j = (blockIdx.y * blockDim.y + threadIdx.y)*stride;
 
         if (i < M && j < N) {
             for (int k = 0; k < K; k++) {
                 temp1 += d_A[(i)*K + k] * d_B[k*N + j];
-                /* Below neighbour */
                 if (j+1 < N) { // only if not end
-                    temp2 += d_A[(i)*K + k] * d_B[k*N + (j+1)];
+                    temp2 += d_A[(i)*K + k] * d_B[k*N + (j+1)]; // right neighbour
                 }
-                /* Right neighbour
-                if (i+1 < M) { // only if not end
-                    temp2 += d_A[(i+1)*K + k] * d_B[k*N + (j)];
-                } */
             }
             d_C[i*N + j] = temp1;
-	    /* below neighbour */
             if (j+1 < N) { // only if not end
                 d_C[(i)*N + (j+1)] = temp2;
             }
-            /* right neighbour
-	    if (i+1 < M) { // only if not end
-		d_C[(i+1)*N + j] = temp2;
-	    }*/
         }
     }
 
@@ -207,7 +198,7 @@ extern "C" {
         }
     }
 
-    void matmult_gpu4(int M, int N, int K, double* h_A, double *h_B, double* h_C) {
+  void matmult_gpu4(int M, int N, int K, double* h_A, double *h_B, double* h_C) {
         double *d_A, *d_B, *d_C; // Device variables
         int size_A = M*K*sizeof(double);
         int size_B = N*K*sizeof(double);
@@ -239,8 +230,74 @@ extern "C" {
         cudaFree(d_C);
     }
 
+    /* part 5: GPU (shared memory version) */
+    #define BLOCKSIZE 16
+    __global__ void matmult_gpu5_kernel(int M, int N, int K, double* d_A, double* d_B, double* d_C) {
+	//Block indecies
+    int blockRow = blockIdx.y;
+    int blockCol = blockIdx.x;
 
-    #define BLOCKDIM 32
+    //Row, Col inside the Block
+    int row = threadIdx.y;
+    int col = threadIdx.x;
+
+    //Sub matrix C
+    double *Csub = &d_C[blockRow*BLOCK_SIZE*N+blockCol*BLOCK_SIZE];
+
+    //Inter mediate sum for current thread
+    double intSum = 0.0;
+
+    for(int i=0; i< (K/BLOCK_SIZE); i++){
+      //Get Submatrix of A
+      double *Asub = &d_A[blockRow*BLOCK_SIZE*K+BLOCK_SIZE*i];
+      double *Bsub = &d_B[N*BLOCK_SIZE*i+blockCol*BLOCK_SIZE];
+
+      __shared__ double As[BLOCK_SIZE][BLOCK_SIZE];
+      __shared__ double Bs[BLOCK_SIZE][BLOCK_SIZE];
+
+      As[row][col] = Asub[row*K+col];
+      Bs[row][col] = Bsub[row*N+col];
+
+      __syncthreads();
+
+      for(int j=0; j<BLOCK_SIZE;j++){
+        intSum += As[row][j]*Bs[j][col];
+      }
+      __syncthreads();
+    }
+    Csub[row*N+col] = intSum;
+}
+    
+void matmult_gpu5(int m, int n, int k, double *h_a, double *h_b, double *h_c){
+  double* d_a, *d_b, *d_c;
+
+  //Allocate memory on device
+  cudaMalloc((void**)&d_a, m*k*sizeof(double));
+  cudaMalloc((void**)&d_b, k*n*sizeof(double));
+  cudaMalloc((void**)&d_c, m*n*sizeof(double));
+
+  //Copy matrices to device memory
+  cudaMemcpy(d_a, h_a, m*k*sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_b, h_b, k*n*sizeof(double), cudaMemcpyHostToDevice);
+
+  dim3 threadsPerBlock(BLOCKDIM,BLOCKDIM);
+  dim3 blocks((n-1)/BLOCKDIM+1, (m-1)/BLOCKDIM+1);
+
+  //Call kernel
+  matmult_gpu5_kernel<<<blocks,threadsPerBlock>>>(m, n, k, d_a, d_b, d_c);
+  cudaDeviceSynchronize();
+
+  //Copy result to host memory
+  cudaMemcpy(h_c, d_c, m*n*sizeof(double), cudaMemcpyDeviceToHost);
+
+  //Free device memory
+  cudaFree(d_a);
+  cudaFree(d_b);
+  cudaFree(d_c);
+}
+
+        
+
 
     /* part 6: DGEMM function for GPUs, NVIDIA */
     void matmult_gpulib(int M, int N, int K, double* A, double *B, double* C) {
@@ -270,72 +327,4 @@ extern "C" {
             exit(1);
         }
     }
-
-
-__global__ void kernelFunc_gpu5(int m,int n,int k,double *d_A,double *d_B,double *d_C);
-void matmult_gpu5(int m, int n, int k, double *h_a, double *h_b, double *h_c){
-  double* d_a, *d_b, *d_c;
-
-  //Allocate memory on device
-  cudaMalloc((void**)&d_a, m*k*sizeof(double));
-  cudaMalloc((void**)&d_b, k*n*sizeof(double));
-  cudaMalloc((void**)&d_c, m*n*sizeof(double));
-
-  //Copy matrices to device memory
-  cudaMemcpy(d_a, h_a, m*k*sizeof(double), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_b, h_b, k*n*sizeof(double), cudaMemcpyHostToDevice);
-
-  dim3 threadsPerBlock(BLOCKDIM,BLOCKDIM);
-  dim3 blocks((n-1)/BLOCKDIM+1, (m-1)/BLOCKDIM+1);
-
-  //Call kernel
-  kernelFunc_gpu5<<<blocks,threadsPerBlock>>>(m, n, k, d_a, d_b, d_c);
-  cudaDeviceSynchronize();
-
-  //Copy result to host memory
-  cudaMemcpy(h_c, d_c, m*n*sizeof(double), cudaMemcpyDeviceToHost);
-
-  //Free device memory
-  cudaFree(d_a);
-  cudaFree(d_b);
-  cudaFree(d_c);
-}
-
-__global__ void kernelFunc_gpu5(int m, int n, int k, double *d_a, double* d_b, double* d_c){
-
-    //Block indecies
-    int blockRow = blockIdx.y;
-    int blockCol = blockIdx.x;
-
-    //Row, Col inside the Block
-    int row = threadIdx.y;
-    int col = threadIdx.x;
-
-    //Sub matrix C
-    double *Csub = &d_c[blockRow*BLOCKDIM*n+blockCol*BLOCKDIM];
-
-    //Inter mediate sum for current thread
-    double intSum = 0.0;
-
-    for(int i=0; i< (k/BLOCKDIM); i++){
-      //Get Submatrix of A
-      double *Asub = &d_a[blockRow*BLOCKDIM*k+BLOCKDIM*i];
-      double *Bsub = &d_b[n*BLOCKDIM*i+blockCol*BLOCKDIM];
-
-      __shared__ double As[BLOCKDIM][BLOCKDIM];
-      __shared__ double Bs[BLOCKDIM][BLOCKDIM];
-
-      As[row][col] = Asub[row*k+col];
-      Bs[row][col] = Bsub[row*n+col];
-
-      __syncthreads();
-
-      for(int j=0; j<BLOCKDIM;j++){
-        intSum += As[row][j]*Bs[j][col];
-      }
-
-      __syncthreads();
-    }
-    Csub[row*n+col] = intSum;
-}
 }
