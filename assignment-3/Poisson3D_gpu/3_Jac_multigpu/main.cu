@@ -143,8 +143,8 @@ int main(int argc, char *argv[]){
     int it = 0;
     double ts = omp_get_wtime();
     while(it < iter_max){
-        swap(d_uOld, d_u);
-        swap(d1_uOld, d1_u);    
+        swap(&d_uOld, &d_u);
+        swap(&d1_uOld, &d1_u);    
 
         cudaSetDevice(0);
         jacobi_v3_dv0<<<gridsize,blocksize>>>(d_u, d_uOld, d1_uOld, d_f, frac, delta2, N, N2);

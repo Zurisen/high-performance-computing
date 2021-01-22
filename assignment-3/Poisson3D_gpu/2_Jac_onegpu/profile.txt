@@ -1,21 +1,21 @@
-==PROF== Connected to process 17071 (/zhome/7b/f/153842/high-performance-computing/assignment-3/Poisson3D_gpu/2_Jac_onegpu/poisson_j)
+==PROF== Connected to process 9562 (/zhome/7b/f/153842/high-performance-computing/assignment-3/Poisson3D_gpu/2_Jac_onegpu/poisson_j)
 ==PROF== Profiling "jacobi_v1" - 1: 0%....50%....100% - 10 passes
-128 1 1.169936 0.854748 57361.139255 0.000000
-==PROF== Disconnected from process 17071
-[17071] poisson_j@127.0.0.1
-  jacobi_v1(double*, double*, double*, int, int, int, double, double), 2021-Jan-21 22:36:38, Context 1, Stream 7
+128 1 1.077710 0.927893
+==PROF== Disconnected from process 9562
+[9562] poisson_j@127.0.0.1
+  jacobi_v1(double*, double*, double*, int, int, int, double, double), 2021-Jan-22 08:56:07, Context 1, Stream 7
     Section: GPU Speed Of Light
     ---------------------------------------------------------------------- --------------- ------------------------------
-    DRAM Frequency                                                           cycle/nsecond                           1.20
-    SM Frequency                                                             cycle/usecond                         757.55
-    Elapsed Cycles                                                                   cycle                         169912
-    Memory [%]                                                                           %                          89.67
-    SOL DRAM                                                                             %                          12.07
-    Duration                                                                       usecond                         224.29
-    SOL L1/TEX Cache                                                                     %                          93.07
-    SOL L2 Cache                                                                         %                          47.73
-    SM Active Cycles                                                                 cycle                      163693.57
-    SM [%]                                                                               %                           5.34
+    DRAM Frequency                                                           cycle/nsecond                           1.21
+    SM Frequency                                                             cycle/usecond                         759.76
+    Elapsed Cycles                                                                   cycle                         169655
+    Memory [%]                                                                           %                          89.79
+    SOL DRAM                                                                             %                          12.08
+    Duration                                                                       usecond                         223.30
+    SOL L1/TEX Cache                                                                     %                          93.04
+    SOL L2 Cache                                                                         %                          46.87
+    SM Active Cycles                                                                 cycle                      163732.38
+    SM [%]                                                                               %                           5.35
     ---------------------------------------------------------------------- --------------- ------------------------------
     OK    The kernel is utilizing greater than 80.0% of the available compute or memory performance of the device. To   
           further improve performance, work will likely need to be shifted from the most utilized to another unit.      
@@ -42,8 +42,8 @@
     Block Limit Warps                                                                block                              4
     Theoretical Active Warps per SM                                                   warp                             64
     Theoretical Occupancy                                                                %                            100
-    Achieved Occupancy                                                                   %                          72.49
-    Achieved Active Warps Per SM                                                      warp                          46.39
+    Achieved Occupancy                                                                   %                          72.35
+    Achieved Active Warps Per SM                                                      warp                          46.30
     ---------------------------------------------------------------------- --------------- ------------------------------
 
 removed '/tmp/nsight-compute-lock'

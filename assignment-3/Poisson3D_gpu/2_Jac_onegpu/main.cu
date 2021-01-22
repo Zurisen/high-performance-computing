@@ -76,18 +76,10 @@ int main(int argc, char *argv[]){
     double ts = omp_get_wtime();
 
     while(it < iter_max){
-    
-        //cudaEventRecord(start,0);
-        
-        swap(d_uOld,d_u); 
+        swap(&d_uOld, &d_u); 
         jacobi_v1<<<gridsize,blocksize>>>(d_u, d_uOld, d_f, N, N2, iter_max, frac, delta2);
         cudaDeviceSynchronize();
         it++;
-               
-        //cudaEventRecord(stop,0);
-        //cudaEventSynchronize(stop);
-        //cudaEventElapsedTime(&cycle, start, stop);
-        //elapsed += cycle;
     }
     
     double te = omp_get_wtime()-ts;
@@ -111,13 +103,11 @@ int main(int argc, char *argv[]){
     }
 
     // Calculate effective bandwidth
-    double efBW = N*N*N*sizeof(double)*4*it/te/1e3; 
+    //double efBW = N*N*N*sizeof(double)*4*it/te/1e3; 
        // 4 -> read uold, f | read and write u 
-    // Calculate it/s
     double itpersec  = it/te;
-    int kbytes = N*N*N*sizeof(double)*3/1000;
     //print info
-    printf("%d %d %3.6f %3.6f %3.6f %3.6f\n", N, it, te, itpersec, kbytes, efBW);
+    printf("%d %d %3.6f %3.6f\n", N, it, te, itpersec);
 
     //Free host and device memory    
     cudaFreeHost(h_f);

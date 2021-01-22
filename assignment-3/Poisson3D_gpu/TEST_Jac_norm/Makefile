@@ -2,7 +2,7 @@ TARGET = poisson_j
 SRCS	 =  
 OBJS	 = main.o func.o print.o
 
-OPT	= -g
+OPT	= -use_fast_math -O3 -Ofast
 PIC	=
 XOPTS = -Xptxas=-v
 ARCH  = -arch=sm_80

@@ -87,7 +87,7 @@ int main(int argc, char *argv[]){
         *h_norm = 0;   
         
         cudaMemcpy(d_norm, h_norm ,norm_size, cudaMemcpyHostToDevice);
-        swap(d_uOld,d_u); 
+        swap(&d_uOld, &d_u); 
         jacobi_v1<<<gridsize,blocksize>>>(d_u, d_uOld, d_f, N, N2, iter_max, frac, delta2, d_norm);
         cudaMemcpy(h_norm, d_norm ,norm_size, cudaMemcpyDeviceToHost);
         cudaDeviceSynchronize();

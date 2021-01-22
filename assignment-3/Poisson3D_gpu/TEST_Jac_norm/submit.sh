@@ -10,15 +10,14 @@
 module load cuda/11.1
 module load gcc/9.2.0
 
-OUTFILE="profile.txt"
+OUTFILE="results.txt"
 rm $OUTFILE
 EXECUTABLE=poisson_j
-ITER=1
+ITER=1000
 START_T=10
+TOLERANCE=10
 
-
-for i in 128
+for i in 64 128 256
 do
-    nv-nsight-cu-cli ./poisson_j $i $ITER $START_T >> $OUTFILE
-    nsys profile poisson_j $i 1000 $start_T
+    ./poisson_j $i $ITER $START_T $TOLERANCE >> $OUTFILE
 done

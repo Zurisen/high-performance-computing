@@ -5,14 +5,20 @@
 #include "func.h"
 #include "print.h"
 #include <omp.h>
+
+__managed__ double sh_norm=1000000.0;
+
 __global__ void jacobi_v1(double *d_u, double *d_uOld, double *d_f, int N, int N2, int iter_max, double frac, double delta2){
 
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
     int k = blockIdx.z * blockDim.z + threadIdx.z;
-
+    double norm_value;
     if (i>0 && i<N-1 && j>0 && j<N-1 && k>0 && k<N-1){
        	d_u[i*N2+j*N+k]	= frac*(d_uOld[(i-1)*N2+j*N+k] + d_uOld[(i+1)*N2+j*N+k]+d_uOld[i*N2+(j-1)*N+k] + d_uOld[i*N2+(j+1)*N+k]+d_uOld[i*N2+j*N+k-1] + d_uOld[i*N2+j*N+k+1]+delta2*d_f[i*N2+j*N+k]);
+        
+        norm_value = ((d_u[i*N2+j*N+k]-d_uOld[i*N2+j*N+k])*(d_u[i*N2+j*N+k]-d_uOld[i*N2+j*N+k]));
+        atomicAdd(&sh_norm, norm_value);
     }
 }
 
@@ -21,6 +27,7 @@ int main(int argc, char *argv[]){
     int N = atoi(argv[1]);
     int iter_max = atoi(argv[2]);
     double start_T = atof(argv[3]);
+    double tolerance = atof(argv[4]);
     int output_type = 4;
     char *output_prefix = "poisson_j_gpu1";
     char *output_ext = "";
@@ -41,7 +48,6 @@ int main(int argc, char *argv[]){
     cudaMalloc((void**)&d_u, size);
     cudaMalloc((void**)&d_uOld, size);
     cudaMalloc((void**)&d_f, size);
-
     // Pinning memory in host
     cudaMallocHost((void**)&h_u, size);
     cudaMallocHost((void**)&h_uOld, size);
@@ -66,27 +72,18 @@ int main(int argc, char *argv[]){
     // Jacobi max iterations loop in host
     double frac = 1.0/6.0;
     double delta2 = (2.0*2.0)/N2;
-        // timing
-        cudaEvent_t start, stop;
-        cudaEventCreate(&start);
-        cudaEventCreate(&stop);
     
     int it = 0;
-    float elapsed=0, cycle;
-    while(it < iter_max){
-    
-        cudaEventRecord(start,0);
+    double ts = omp_get_wtime();
+    while(it < iter_max && sh_norm>tolerance){
+        sh_norm = 0;   
         
-        swap(d_uOld,d_u); 
+        swap(&d_uOld, &d_u); 
         jacobi_v1<<<gridsize,blocksize>>>(d_u, d_uOld, d_f, N, N2, iter_max, frac, delta2);
         cudaDeviceSynchronize();
         it++;
-       
-        cudaEventRecord(stop,0);
-        cudaEventSynchronize(stop);
-        cudaEventElapsedTime(&cycle, start, stop);
-        elapsed += cycle;
     }
+    double te = omp_get_wtime() - ts;
     // Copy back to host
     cudaMemcpy(h_u, d_u, size, cudaMemcpyDeviceToHost);
 
@@ -107,11 +104,13 @@ int main(int argc, char *argv[]){
     }
 
     // Calculate effective bandwidth
-    double efBW = N*N*N*sizeof(double)*5*it/elapsed/1e6; 
-       // 5 -> read uold, uswap, f | read and write u 
-    
+    double efBW = N*N*N*sizeof(double)*4*it/te/1e3;
+       // 4 -> read uold, f | read and write u
+    // Calculate it/s
+    double itpersec  = it/te;
+    int kbytes = N*N*N*sizeof(double)*3/1000;
     //print info
-    printf("%d %d %3.6f %3.6f\n", N, it, elapsed,efBW);
+    printf("%d %d %3.6f %3.6f %3.6f %3.6f\n", N, it, te, itpersec, kbytes, efBW);
 
     //Free host and device memory    
     cudaFreeHost(h_f);
