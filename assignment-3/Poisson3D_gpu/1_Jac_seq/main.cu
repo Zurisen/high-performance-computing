@@ -34,8 +34,6 @@ int main(int argc, char *argv[]){
     int N = atoi(argv[1]);
     int iter_max = atoi(argv[2]);
     double start_T = atof(argv[3]);
-    int grid= 1;
-    int grid = atoi(argv[4]);
     int output_type = 4;
     char *output_prefix = "poisson_j_gpu1";
     char *output_ext = "";
@@ -88,7 +86,7 @@ int main(int argc, char *argv[]){
     while(it < iter_max){
 
 	    swap(&d_uOld,&d_u);
-        jacobi_v1<<<grid, 1>>>(d_u, d_uOld, d_f, N, N2, iter_max, frac, delta2);
+        jacobi_v1<<<1, 1>>>(d_u, d_uOld, d_f, N, N2, iter_max, frac, delta2);
         cudaDeviceSynchronize();
         
         it++;
