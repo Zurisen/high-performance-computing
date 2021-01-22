@@ -28,7 +28,7 @@ if not os.path.exists(parent_folder +'/plots'):
 data.columns = ["size_N", "iterations", "time", "iters_per_second"]
 distinct_sizes_N = data.size_N.unique()
 def compute_memory(data):
-	memory = (data.size_N**3)*8*data.iterations/1000
+	memory = (data.size_N**3)*8/1000
 	return memory
 memories = data.apply(compute_memory, axis=1)
 data["memory"] = memories.to_numpy()
