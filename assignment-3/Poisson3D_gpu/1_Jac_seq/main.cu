@@ -12,7 +12,7 @@ __global__ void kernel(int N, double *uOld, double *uNew, double *f, double delt
 
 }
 
-__global__ void jacobi_v1(double *d_u, double *d_uOld, double *d_f, int N, int N2, int iter_max, double frac, double delta2){
+__global__ void jacobi_v1(double *d_u, double *d_uOld, double *d_f, int N, int N2, int iter_max, double frac, double delta2, int grid){
 
     int i, j, k;
 
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]){
     while(it < iter_max){
 
 	    swap(&d_uOld,&d_u);
-        jacobi_v1<<<1, 1>>>(d_u, d_uOld, d_f, N, N2, iter_max, frac, delta2);
+        jacobi_v1<<<grid, 1>>>(d_u, d_uOld, d_f, N, N2, iter_max, frac, delta2);
         cudaDeviceSynchronize();
         
         it++;
