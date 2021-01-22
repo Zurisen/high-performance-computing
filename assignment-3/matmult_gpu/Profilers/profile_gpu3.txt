@@ -1,0 +1,265 @@
+==PROF== Connected to process 4923 (/zhome/06/e/144589/high-performance-computing-master/assignment-3/matmult_gpu/matmult_f.nvcc)
+==PROF== Profiling "matmult_gpu3_kernel" - 1: 0%....50%....100% - 10 passes
+==PROF== Profiling "matmult_gpu3_kernel" - 2: 0%....50%....100% - 10 passes
+==PROF== Profiling "matmult_gpu3_kernel" - 3: 0%....50%....100% - 10 passes
+==PROF== Profiling "matmult_gpu3_kernel" - 4: 0%....50%....100% - 10 passes
+==PROF== Profiling "matmult_gpu3_kernel" - 5: 0%....50%....100% - 10 passes
+    6144.000    380.769 0 # matmult_gpu3
+==PROF== Disconnected from process 4923
+[4923] matmult_f.nvcc@127.0.0.1
+  matmult_gpu3_kernel, 2021-Jan-22 23:02:34, Context 1, Stream 7
+    Section: GPU Speed Of Light
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    DRAM Frequency                                                           cycle/nsecond                           1.21
+    SM Frequency                                                             cycle/usecond                         764.55
+    Elapsed Cycles                                                                   cycle                         895638
+    Memory [%]                                                                           %                          78.38
+    SOL DRAM                                                                             %                           0.23
+    Duration                                                                       msecond                           1.17
+    SOL L1/TEX Cache                                                                     %                          99.43
+    SOL L2 Cache                                                                         %                           3.78
+    SM Active Cycles                                                                 cycle                      706034.65
+    SM [%]                                                                               %                           6.56
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    WRN   Memory is more heavily utilized than Compute: Look at the Memory Workload Analysis report section to see      
+          where the memory system bottleneck is. Check memory replay (coalescing) metrics to make sure you're           
+          efficiently utilizing the bytes transferred. Also consider whether it is possible to do more work per memory  
+          access (kernel fusion) or whether there are values you can (re)compute.                                       
+
+    Section: Launch Statistics
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    Block Size                                                                                                        256
+    Grid Size                                                                                                        2145
+    Registers Per Thread                                                   register/thread                             32
+    Shared Memory Configuration Size                                                 Kbyte                          32.77
+    Driver Shared Memory Per Block                                             Kbyte/block                           1.02
+    Dynamic Shared Memory Per Block                                             byte/block                              0
+    Static Shared Memory Per Block                                              byte/block                              0
+    Threads                                                                         thread                         549120
+    Waves Per SM                                                                                                     2.48
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    WRN   A wave of thread blocks is defined as the maximum number of blocks that can be executed in parallel on the    
+          target GPU. The number of blocks in a wave depends on the number of multiprocessors and the theoretical       
+          occupancy of the kernel. This kernel launch results in 2 full waves and a partial wave of 416 thread blocks.  
+          Under the assumption of a uniform execution duration of all thread blocks, the partial wave may account for   
+          up to 33.3% of the total kernel runtime with a lower occupancy of 51.9%. Try launching a grid with no         
+          partial wave. The overall impact of this tail effect also lessens with the number of full waves executed for  
+          a grid.                                                                                                       
+
+    Section: Occupancy
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    Block Limit SM                                                                   block                             32
+    Block Limit Registers                                                            block                              8
+    Block Limit Shared Mem                                                           block                            164
+    Block Limit Warps                                                                block                              8
+    Theoretical Active Warps per SM                                                   warp                             64
+    Theoretical Occupancy                                                                %                            100
+    Achieved Occupancy                                                                   %                          48.09
+    Achieved Active Warps Per SM                                                      warp                          30.78
+    ---------------------------------------------------------------------- --------------- ------------------------------
+
+  matmult_gpu3_kernel, 2021-Jan-22 23:02:35, Context 1, Stream 7
+    Section: GPU Speed Of Light
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    DRAM Frequency                                                           cycle/nsecond                           1.21
+    SM Frequency                                                             cycle/usecond                         764.44
+    Elapsed Cycles                                                                   cycle                         895585
+    Memory [%]                                                                           %                          78.39
+    SOL DRAM                                                                             %                           0.23
+    Duration                                                                       msecond                           1.17
+    SOL L1/TEX Cache                                                                     %                          99.42
+    SOL L2 Cache                                                                         %                           3.78
+    SM Active Cycles                                                                 cycle                      706095.88
+    SM [%]                                                                               %                           6.56
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    WRN   Memory is more heavily utilized than Compute: Look at the Memory Workload Analysis report section to see      
+          where the memory system bottleneck is. Check memory replay (coalescing) metrics to make sure you're           
+          efficiently utilizing the bytes transferred. Also consider whether it is possible to do more work per memory  
+          access (kernel fusion) or whether there are values you can (re)compute.                                       
+
+    Section: Launch Statistics
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    Block Size                                                                                                        256
+    Grid Size                                                                                                        2145
+    Registers Per Thread                                                   register/thread                             32
+    Shared Memory Configuration Size                                                 Kbyte                          32.77
+    Driver Shared Memory Per Block                                             Kbyte/block                           1.02
+    Dynamic Shared Memory Per Block                                             byte/block                              0
+    Static Shared Memory Per Block                                              byte/block                              0
+    Threads                                                                         thread                         549120
+    Waves Per SM                                                                                                     2.48
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    WRN   A wave of thread blocks is defined as the maximum number of blocks that can be executed in parallel on the    
+          target GPU. The number of blocks in a wave depends on the number of multiprocessors and the theoretical       
+          occupancy of the kernel. This kernel launch results in 2 full waves and a partial wave of 416 thread blocks.  
+          Under the assumption of a uniform execution duration of all thread blocks, the partial wave may account for   
+          up to 33.3% of the total kernel runtime with a lower occupancy of 51.9%. Try launching a grid with no         
+          partial wave. The overall impact of this tail effect also lessens with the number of full waves executed for  
+          a grid.                                                                                                       
+
+    Section: Occupancy
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    Block Limit SM                                                                   block                             32
+    Block Limit Registers                                                            block                              8
+    Block Limit Shared Mem                                                           block                            164
+    Block Limit Warps                                                                block                              8
+    Theoretical Active Warps per SM                                                   warp                             64
+    Theoretical Occupancy                                                                %                            100
+    Achieved Occupancy                                                                   %                          48.12
+    Achieved Active Warps Per SM                                                      warp                          30.80
+    ---------------------------------------------------------------------- --------------- ------------------------------
+
+  matmult_gpu3_kernel, 2021-Jan-22 23:02:35, Context 1, Stream 7
+    Section: GPU Speed Of Light
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    DRAM Frequency                                                           cycle/nsecond                           1.21
+    SM Frequency                                                             cycle/usecond                         764.69
+    Elapsed Cycles                                                                   cycle                         895653
+    Memory [%]                                                                           %                          78.38
+    SOL DRAM                                                                             %                           0.23
+    Duration                                                                       msecond                           1.17
+    SOL L1/TEX Cache                                                                     %                          99.42
+    SOL L2 Cache                                                                         %                           3.78
+    SM Active Cycles                                                                 cycle                      706096.11
+    SM [%]                                                                               %                           6.56
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    WRN   Memory is more heavily utilized than Compute: Look at the Memory Workload Analysis report section to see      
+          where the memory system bottleneck is. Check memory replay (coalescing) metrics to make sure you're           
+          efficiently utilizing the bytes transferred. Also consider whether it is possible to do more work per memory  
+          access (kernel fusion) or whether there are values you can (re)compute.                                       
+
+    Section: Launch Statistics
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    Block Size                                                                                                        256
+    Grid Size                                                                                                        2145
+    Registers Per Thread                                                   register/thread                             32
+    Shared Memory Configuration Size                                                 Kbyte                          32.77
+    Driver Shared Memory Per Block                                             Kbyte/block                           1.02
+    Dynamic Shared Memory Per Block                                             byte/block                              0
+    Static Shared Memory Per Block                                              byte/block                              0
+    Threads                                                                         thread                         549120
+    Waves Per SM                                                                                                     2.48
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    WRN   A wave of thread blocks is defined as the maximum number of blocks that can be executed in parallel on the    
+          target GPU. The number of blocks in a wave depends on the number of multiprocessors and the theoretical       
+          occupancy of the kernel. This kernel launch results in 2 full waves and a partial wave of 416 thread blocks.  
+          Under the assumption of a uniform execution duration of all thread blocks, the partial wave may account for   
+          up to 33.3% of the total kernel runtime with a lower occupancy of 51.9%. Try launching a grid with no         
+          partial wave. The overall impact of this tail effect also lessens with the number of full waves executed for  
+          a grid.                                                                                                       
+
+    Section: Occupancy
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    Block Limit SM                                                                   block                             32
+    Block Limit Registers                                                            block                              8
+    Block Limit Shared Mem                                                           block                            164
+    Block Limit Warps                                                                block                              8
+    Theoretical Active Warps per SM                                                   warp                             64
+    Theoretical Occupancy                                                                %                            100
+    Achieved Occupancy                                                                   %                          48.12
+    Achieved Active Warps Per SM                                                      warp                          30.79
+    ---------------------------------------------------------------------- --------------- ------------------------------
+
+  matmult_gpu3_kernel, 2021-Jan-22 23:02:36, Context 1, Stream 7
+    Section: GPU Speed Of Light
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    DRAM Frequency                                                           cycle/nsecond                           1.21
+    SM Frequency                                                             cycle/usecond                         764.67
+    Elapsed Cycles                                                                   cycle                         895663
+    Memory [%]                                                                           %                          78.38
+    SOL DRAM                                                                             %                           0.23
+    Duration                                                                       msecond                           1.17
+    SOL L1/TEX Cache                                                                     %                          99.43
+    SOL L2 Cache                                                                         %                           3.78
+    SM Active Cycles                                                                 cycle                      706042.09
+    SM [%]                                                                               %                           6.56
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    WRN   Memory is more heavily utilized than Compute: Look at the Memory Workload Analysis report section to see      
+          where the memory system bottleneck is. Check memory replay (coalescing) metrics to make sure you're           
+          efficiently utilizing the bytes transferred. Also consider whether it is possible to do more work per memory  
+          access (kernel fusion) or whether there are values you can (re)compute.                                       
+
+    Section: Launch Statistics
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    Block Size                                                                                                        256
+    Grid Size                                                                                                        2145
+    Registers Per Thread                                                   register/thread                             32
+    Shared Memory Configuration Size                                                 Kbyte                          32.77
+    Driver Shared Memory Per Block                                             Kbyte/block                           1.02
+    Dynamic Shared Memory Per Block                                             byte/block                              0
+    Static Shared Memory Per Block                                              byte/block                              0
+    Threads                                                                         thread                         549120
+    Waves Per SM                                                                                                     2.48
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    WRN   A wave of thread blocks is defined as the maximum number of blocks that can be executed in parallel on the    
+          target GPU. The number of blocks in a wave depends on the number of multiprocessors and the theoretical       
+          occupancy of the kernel. This kernel launch results in 2 full waves and a partial wave of 416 thread blocks.  
+          Under the assumption of a uniform execution duration of all thread blocks, the partial wave may account for   
+          up to 33.3% of the total kernel runtime with a lower occupancy of 51.9%. Try launching a grid with no         
+          partial wave. The overall impact of this tail effect also lessens with the number of full waves executed for  
+          a grid.                                                                                                       
+
+    Section: Occupancy
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    Block Limit SM                                                                   block                             32
+    Block Limit Registers                                                            block                              8
+    Block Limit Shared Mem                                                           block                            164
+    Block Limit Warps                                                                block                              8
+    Theoretical Active Warps per SM                                                   warp                             64
+    Theoretical Occupancy                                                                %                            100
+    Achieved Occupancy                                                                   %                          48.12
+    Achieved Active Warps Per SM                                                      warp                          30.80
+    ---------------------------------------------------------------------- --------------- ------------------------------
+
+  matmult_gpu3_kernel, 2021-Jan-22 23:02:36, Context 1, Stream 7
+    Section: GPU Speed Of Light
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    DRAM Frequency                                                           cycle/nsecond                           1.21
+    SM Frequency                                                             cycle/usecond                         764.66
+    Elapsed Cycles                                                                   cycle                         895843
+    Memory [%]                                                                           %                          78.36
+    SOL DRAM                                                                             %                           0.23
+    Duration                                                                       msecond                           1.17
+    SOL L1/TEX Cache                                                                     %                          99.43
+    SOL L2 Cache                                                                         %                           3.78
+    SM Active Cycles                                                                 cycle                      706045.75
+    SM [%]                                                                               %                           6.56
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    WRN   Memory is more heavily utilized than Compute: Look at the Memory Workload Analysis report section to see      
+          where the memory system bottleneck is. Check memory replay (coalescing) metrics to make sure you're           
+          efficiently utilizing the bytes transferred. Also consider whether it is possible to do more work per memory  
+          access (kernel fusion) or whether there are values you can (re)compute.                                       
+
+    Section: Launch Statistics
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    Block Size                                                                                                        256
+    Grid Size                                                                                                        2145
+    Registers Per Thread                                                   register/thread                             32
+    Shared Memory Configuration Size                                                 Kbyte                          32.77
+    Driver Shared Memory Per Block                                             Kbyte/block                           1.02
+    Dynamic Shared Memory Per Block                                             byte/block                              0
+    Static Shared Memory Per Block                                              byte/block                              0
+    Threads                                                                         thread                         549120
+    Waves Per SM                                                                                                     2.48
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    WRN   A wave of thread blocks is defined as the maximum number of blocks that can be executed in parallel on the    
+          target GPU. The number of blocks in a wave depends on the number of multiprocessors and the theoretical       
+          occupancy of the kernel. This kernel launch results in 2 full waves and a partial wave of 416 thread blocks.  
+          Under the assumption of a uniform execution duration of all thread blocks, the partial wave may account for   
+          up to 33.3% of the total kernel runtime with a lower occupancy of 51.9%. Try launching a grid with no         
+          partial wave. The overall impact of this tail effect also lessens with the number of full waves executed for  
+          a grid.                                                                                                       
+
+    Section: Occupancy
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    Block Limit SM                                                                   block                             32
+    Block Limit Registers                                                            block                              8
+    Block Limit Shared Mem                                                           block                            164
+    Block Limit Warps                                                                block                              8
+    Theoretical Active Warps per SM                                                   warp                             64
+    Theoretical Occupancy                                                                %                            100
+    Achieved Occupancy                                                                   %                          48.12
+    Achieved Active Warps Per SM                                                      warp                          30.80
+    ---------------------------------------------------------------------- --------------- ------------------------------
+
+removed '/tmp/nsight-compute-lock'
