@@ -243,32 +243,33 @@ extern "C" {
     #define BLOCKDIM 32
 
     /* part 6: DGEMM function for GPUs, NVIDIA */
-    void matmult_gpulib(int M, int N, int K, double* A, double *B, double* C) {
+    void matmult_gpulib(int m, int n, int k, double* h_A, double *h_B, double* h_C) {
+    double *d_A, *d_B, *d_C;
+    cudaMalloc(&d_A, sizeof(double) * m * k);
+    cudaMalloc(&d_B, sizeof(double) * k * n);
+    cudaMalloc(&d_C, sizeof(double) * m * n);
 
-        /* Declare handle and initialize cublas */
-        cublasHandle_t handle;
-        cublasStatus_t status = cublasCreate(&handle);
-        if (status != CUBLAS_STATUS_SUCCESS) { // check if init successful
-            printf("Error: Initialization error CUBLAS. \n");
-            exit(1);
-        }
+    cudaMemcpy(d_A, h_A, sizeof(double) * m * k, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, h_B, sizeof(double) * k * n, cudaMemcpyHostToDevice);
 
-        double alpha = 1.0; // no prefactor
-        double beta = 0.0; // C matrix not involved
+    int lda=m,ldb=k,ldc=m;
+    double alpha = 1.0;
+    double beta = 0.0;
 
-    
-        status = cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha, A, M, B, N, &beta, C, K);
-        if (status != CUBLAS_STATUS_SUCCESS) { // check no errors are outputed in the execution
-            printf("Error: Execution error CUBLAS. \n");
-            exit(1);
-        }
+    cublasHandle_t handle;
+    if(cublasCreate(&handle) != CUBLAS_STATUS_SUCCESS){
+      printf("Error: CUBLAS initialization failed!\n");
+      return;
+    }
 
-        /* Destroy handle and free memory */
-        status = cublasDestroy(handle);
-        if (status != CUBLAS_STATUS_SUCCESS) {
-            printf("Error: Error destroying CUBLAS handle. \n");
-            exit(1);
-        }
+    cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, m, n, k, &alpha, d_A, lda, d_B, ldb, &beta, d_C, ldc);
+    cudaMemcpy(h_C, d_C, sizeof(double) * m * n, cudaMemcpyDeviceToHost);
+
+    cudaFree(d_A);
+    cudaFree(d_B);
+    cudaFree(d_C);
+    cublasDestroy(handle);
+        
     }
 
 
