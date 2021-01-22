@@ -13,11 +13,11 @@ module load gcc/9.2.0
 OUTFILE="results.txt"
 rm $OUTFILE
 EXECUTABLE=poisson_j
-ITER=1000
+ITER=100
 START_T=10
 TOLERANCE=10
 
-for i in 64 128 256
+for i in 64 128 256 512
 do
     ./poisson_j $i $ITER $START_T $TOLERANCE >> $OUTFILE
 done
