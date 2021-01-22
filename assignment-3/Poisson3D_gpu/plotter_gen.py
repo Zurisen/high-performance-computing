@@ -29,7 +29,7 @@ distinct_versions = data.version.unique()
 version_label = ["CPU (16 Threads)", "GPU sequential", "Single GPU", "Dual GPU"]
 
 def compute_memory(data):
-	memory = (data.size_N**3)*8*data.iterations/1000
+	memory = (data.size_N**3)*8/1000
 	return memory
 memories = data.apply(compute_memory, axis=1)
 data["memory"] = memories.to_numpy()

@@ -61,6 +61,8 @@ for times in times_vect:
 	i = i + 1
 data["speedup"] = speedup
 
+# memory footprint
+data["memory"] = data["memory"]
 
 # compute mlups
 mlups = []
