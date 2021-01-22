@@ -20,18 +20,17 @@ except:
 	print("Couldn't find valid file at", str(sys.argv[1]))
 	exit()
 
-if not os.path.exists('plots_gpu3'):
-    os.makedirs('plots_gpu3')
+if not os.path.exists('plots_gpu4'):
+    os.makedirs('plots_gpu4')
 
-
+# 22 24 44 42 28 48 88 82 84 (ncol nrow)
 data.columns = ["memory", "mflops", "version"]
-version_label = ["Below neighbour", "Right neighbour"]
+version_label = ["2x2", "2x4", "4x4", "4x2", "2x8", "4x8", "8x8", "8x2", "8x4"]
 
 # create column of sizes
 distinct_versions = data.version.unique()
-size_n = [64, 128, 256, 512, 1024, 2048, 4096, 8192]*2
+size_n = [64, 128, 256, 512, 1024, 2048, 4096, 8192]*len(distinct_versions)
 print(data)
-print(size_n)
 data["size_n"] = size_n
 distinct_sizes = [64, 128, 256, 512, 1024, 2048, 4096, 8192]
 
@@ -47,7 +46,7 @@ for version in distinct_versions:
 ax.legend()
 plt.xlabel("Size N")
 plt.ylabel("MFLOPS")
-fig.savefig('plots_gpu3' +'/mflopsVSsizeN.png')
+fig.savefig('plots_gpu4' +'/mflopsVSsizeN.png')
 
 # mflops vs memory
 fig = plt.figure()
@@ -59,7 +58,7 @@ for version in distinct_versions:
 ax.legend()
 plt.xlabel("Memory footprint (kBytes)")
 plt.ylabel("MFLOPS")
-fig.savefig('plots_gpu3' +'/mflopsVSmemory.png')
+fig.savefig('plots_gpu4' +'/mflopsVSmemory.png')
 
 # mflops vs size_n
 fig = plt.figure()
@@ -71,8 +70,8 @@ for version in distinct_versions:
 ax.legend()
 plt.xlabel("Size N")
 plt.ylabel("Memory footprint (kBytes)")
-fig.savefig('plots_gpu3' +'/memoryVSsizeN.png')
+fig.savefig('plots_gpu4' +'/memoryVSsizeN.png')
 
-print("Success!. Images saved at /plots_gpu3")
-data.to_csv('plots_gpu3' +'/latex.txt', header=True, index=False, sep='&')
+print("Success!. Images saved at /plots_gpu4")
+data.to_csv('plots_gpu4' +'/latex.txt', header=True, index=False, sep='&')
 exit()
