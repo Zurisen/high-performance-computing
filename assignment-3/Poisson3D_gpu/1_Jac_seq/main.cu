@@ -12,7 +12,7 @@ __global__ void kernel(int N, double *uOld, double *uNew, double *f, double delt
 
 }
 
-__global__ void jacobi_v1(double *d_u, double *d_uOld, double *d_f, int N, int N2, int iter_max, double frac, double delta2, int grid){
+__global__ void jacobi_v1(double *d_u, double *d_uOld, double *d_f, int N, int N2, int iter_max, double frac, double delta2){
 
     int i, j, k;
 
@@ -34,6 +34,8 @@ int main(int argc, char *argv[]){
     int N = atoi(argv[1]);
     int iter_max = atoi(argv[2]);
     double start_T = atof(argv[3]);
+    int grid= 1;
+    int grid = atoi(argv[4]);
     int output_type = 4;
     char *output_prefix = "poisson_j_gpu1";
     char *output_ext = "";
