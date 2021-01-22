@@ -118,9 +118,14 @@ extern "C" {
         if (i < M && j < N) {
             for (int k = 0; k < K; k++) {
                 temp1 += d_A[(i)*K + k] * d_B[k*N + j];
+                /* Below neighbour */
                 if (j+1 < N) { // only if not end
-                    temp2 += d_A[(i)*K + k] * d_B[k*N + (j+1)]; // right neighbour
+                    temp2 += d_A[(i)*K + k] * d_B[k*N + (j+1)];
                 }
+                /* Right neighbour
+                if (i+1 < N) { // only if not end
+                    temp2 += d_A[(i+1)*K + k] * d_B[k*N + (j)];
+                }  */
             }
             d_C[i*N + j] = temp1;
             if (j+1 < N) { // only if not end
