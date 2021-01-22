@@ -1,0 +1,59 @@
+==PROF== Connected to process 12326 (/zhome/06/e/144589/high-performance-computing-master/assignment-3/matmult_gpu/matmult_f.nvcc)
+==PROF== Profiling "matmult_gpu1_kernel" - 1: 0%....50%....100% - 10 passes
+    6144.000      3.763 0 # matmult_gpu1
+==PROF== Disconnected from process 12326
+[12326] matmult_f.nvcc@127.0.0.1
+  matmult_gpu1_kernel, 2021-Jan-22 18:53:51, Context 1, Stream 7
+    Section: GPU Speed Of Light
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    DRAM Frequency                                                           cycle/nsecond                           1.21
+    SM Frequency                                                             cycle/usecond                         764.99
+    Elapsed Cycles                                                                   cycle                     5369581617
+    Memory [%]                                                                           %                           0.05
+    SOL DRAM                                                                             %                           0.00
+    Duration                                                                        second                           7.02
+    SOL L1/TEX Cache                                                                     %                           5.00
+    SOL L2 Cache                                                                         %                           0.01
+    SM Active Cycles                                                                 cycle                    49719211.24
+    SM [%]                                                                               %                           0.05
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    WRN   This kernel grid is too small to fill the available resources on this device. Look at Launch Statistics for   
+          more details.                                                                                                 
+
+    Section: Launch Statistics
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    Block Size                                                                                                          1
+    Grid Size                                                                                                           1
+    Registers Per Thread                                                   register/thread                             32
+    Shared Memory Configuration Size                                                 Kbyte                          32.77
+    Driver Shared Memory Per Block                                             Kbyte/block                           1.02
+    Dynamic Shared Memory Per Block                                             byte/block                              0
+    Static Shared Memory Per Block                                              byte/block                              0
+    Threads                                                                         thread                              1
+    Waves Per SM                                                                                                     0.00
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    WRN   Threads are executed in groups of 32 threads called warps. This kernel launch is configured to execute 1      
+          threads per block. Consequently, some threads in a warp are masked off and those hardware resources are       
+          unused. Try changing the number of threads per block to be a multiple of 32 threads. Between 128 and 256      
+          threads per block is a good initial range for experimentation. Use smaller thread blocks rather than one      
+          large thread block per multiprocessor if latency affects performance. This is particularly beneficial to      
+          kernels that frequently call __syncthreads().                                                                 
+    ----- --------------------------------------------------------------------------------------------------------------
+    WRN   The grid for this launch is configured to execute only 1 blocks, which is less than the GPU's 108             
+          multiprocessors. This can underutilize some multiprocessors. If you do not intend to execute this kernel      
+          concurrently with other workloads, consider reducing the block size to have at least one block per            
+          multiprocessor or increase the size of the grid to fully utilize the available hardware resources.            
+
+    Section: Occupancy
+    ---------------------------------------------------------------------- --------------- ------------------------------
+    Block Limit SM                                                                   block                             32
+    Block Limit Registers                                                            block                             64
+    Block Limit Shared Mem                                                           block                            164
+    Block Limit Warps                                                                block                             64
+    Theoretical Active Warps per SM                                                   warp                             32
+    Theoretical Occupancy                                                                %                             50
+    Achieved Occupancy                                                                   %                           1.56
+    Achieved Active Warps Per SM                                                      warp                              1
+    ---------------------------------------------------------------------- --------------- ------------------------------
+
+removed '/tmp/nsight-compute-lock'
