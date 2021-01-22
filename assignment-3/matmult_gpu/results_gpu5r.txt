@@ -1,0 +1,76 @@
+      96.000   1410.947 # matmult_gpu4 2 2
+     384.000  10184.903 # matmult_gpu4
+    1536.000  58074.193 # matmult_gpu4
+    6144.000 142843.642 # matmult_gpu4
+   24576.000 366523.715 # matmult_gpu4
+   98304.000 674604.530 # matmult_gpu4
+  393216.000 1030172.154 # matmult_gpu4
+ 1572864.000 1240656.715 # matmult_gpu4
+      96.000   1481.434 # matmult_gpu4 2 4 (ncol nrow)
+     384.000   9941.331 # matmult_gpu4
+    1536.000  55536.631 # matmult_gpu4
+    6144.000 153188.116 # matmult_gpu4
+   24576.000 486366.949 # matmult_gpu4
+   98304.000 741036.441 # matmult_gpu4
+  393216.000 1199276.372 # matmult_gpu4
+ 1572864.000 2164543.938 # matmult_gpu4
+      96.000   1304.829 # matmult_gpu4 4 4
+     384.000   7673.643 # matmult_gpu4
+    1536.000  42342.345 # matmult_gpu4
+    6144.000 105135.396 # matmult_gpu4
+   24576.000 321587.530 # matmult_gpu4
+   98304.000 646477.581 # matmult_gpu4
+  393216.000 1020185.522 # matmult_gpu4
+ 1572864.000 1219306.574 # matmult_gpu4
+      96.000   1406.330 # matmult_gpu4 4 2
+     384.000   9019.122 # matmult_gpu4
+    1536.000  49406.825 # matmult_gpu4
+    6144.000 106120.446 # matmult_gpu4
+   24576.000 314490.284 # matmult_gpu4
+   98304.000 540068.635 # matmult_gpu4
+  393216.000 779452.396 # matmult_gpu4
+ 1572864.000 888884.586 # matmult_gpu4
+      96.000   1358.520 # matmult_gpu4 2 8
+     384.000   8335.665 # matmult_gpu4
+    1536.000  44752.628 # matmult_gpu4
+    6144.000 134223.380 # matmult_gpu4
+   24576.000 369780.387 # matmult_gpu4
+   98304.000 734321.198 # matmult_gpu4
+  393216.000 1252387.249 # matmult_gpu4
+ 1572864.000 1575623.008 # matmult_gpu4
+      96.000   1099.607 # matmult_gpu4 4 8
+     384.000   6121.323 # matmult_gpu4
+    1536.000  30894.542 # matmult_gpu4
+    6144.000 101123.699 # matmult_gpu4
+   24576.000 328800.979 # matmult_gpu4
+   98304.000 600472.833 # matmult_gpu4
+  393216.000 970555.347 # matmult_gpu4
+ 1572864.000 1162583.432 # matmult_gpu4
+      96.000   1101.132 # matmult_gpu4 8 8
+     384.000   5212.743 # matmult_gpu4
+    1536.000  25011.395 # matmult_gpu4
+    6144.000  93208.513 # matmult_gpu4
+   24576.000 402628.760 # matmult_gpu4
+   98304.000 516974.368 # matmult_gpu4
+  393216.000 755937.582 # matmult_gpu4
+ 1572864.000 1330787.016 # matmult_gpu4
+      96.000   1244.200 # matmult_gpu4 8 2
+     384.000   7016.283 # matmult_gpu4
+    1536.000  26371.687 # matmult_gpu4
+    6144.000  91653.556 # matmult_gpu4
+   24576.000 311051.183 # matmult_gpu4
+   98304.000 357663.737 # matmult_gpu4
+  393216.000 585797.401 # matmult_gpu4
+ 1572864.000 908394.110 # matmult_gpu4
+      96.000   1113.999 # matmult_gpu4 8 4
+     384.000   5768.413 # matmult_gpu4
+    1536.000  22914.753 # matmult_gpu4
+    6144.000  76457.825 # matmult_gpu4
+      96.000   1152.850 # matmult_gpu4
+     384.000   5671.154 # matmult_gpu4
+    1536.000  22941.385 # matmult_gpu4
+    6144.000  78471.411 # matmult_gpu4
+   24576.000 268212.242 # matmult_gpu4
+   98304.000 450057.866 # matmult_gpu4
+  393216.000 699311.854 # matmult_gpu4
+ 1572864.000 809934.476 # matmult_gpu4
