@@ -262,6 +262,65 @@ void matmult_gpu5(int m, int n, int k, double *h_a, double *h_b, double *h_c){
   cudaFree(d_c);
 }
 
+    /* part 6: DGEMM function for GPUs, NVIDIA */
+    void matmult_gpulib(int M, int N, int K, double* A, double *B, double* C) {
+
+        /* Declare handle and initialize cublas */
+        cublasHandle_t handle;
+        cublasStatus_t status = cublasCreate(&handle);
+        if (status != CUBLAS_STATUS_SUCCESS) { // check if init successful
+            printf("Error: Initialization error CUBLAS. \n");
+            exit(1);
+        }
+
+        double alpha = 1.0; // no prefactor
+        double beta = 0.0; // C matrix not involved
+
+    
+        status = cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha, A, M, B, N, &beta, C, K);
+        if (status != CUBLAS_STATUS_SUCCESS) { // check no errors are outputed in the execution
+            printf("Error: Execution error CUBLAS. \n");
+            exit(1);
+        }
+
+        /* Destroy handle and free memory */
+        status = cublasDestroy(handle);
+        if (status != CUBLAS_STATUS_SUCCESS) {
+            printf("Error: Error destroying CUBLAS handle. \n");
+            exit(1);
+        }
+    }
+
+
+__global__ void kernelFunc_gpu5(int m,int n,int k,double *d_A,double *d_B,double *d_C);
+void matmult_gpu5(int m, int n, int k, double *h_a, double *h_b, double *h_c){
+  double* d_a, *d_b, *d_c;
+
+  //Allocate memory on device
+  cudaMalloc((void**)&d_a, m*k*sizeof(double));
+  cudaMalloc((void**)&d_b, k*n*sizeof(double));
+  cudaMalloc((void**)&d_c, m*n*sizeof(double));
+
+  //Copy matrices to device memory
+  cudaMemcpy(d_a, h_a, m*k*sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_b, h_b, k*n*sizeof(double), cudaMemcpyHostToDevice);
+
+  dim3 threadsPerBlock(BLOCKDIM,BLOCKDIM);
+  dim3 blocks((n-1)/BLOCKDIM+1, (m-1)/BLOCKDIM+1);
+
+  //Call kernel
+  kernelFunc_gpu5<<<blocks,threadsPerBlock>>>(m, n, k, d_a, d_b, d_c);
+  cudaDeviceSynchronize();
+
+  //Copy result to host memory
+  cudaMemcpy(h_c, d_c, m*n*sizeof(double), cudaMemcpyDeviceToHost);
+
+  //Free device memory
+  cudaFree(d_a);
+  cudaFree(d_b);
+  cudaFree(d_c);
+}
+
 __global__ void kernelFunc_gpu5(int m, int n, int k, double *d_a, double* d_b, double* d_c){
 
     //Block indecies
@@ -294,114 +353,8 @@ __global__ void kernelFunc_gpu5(int m, int n, int k, double *d_a, double* d_b, d
       for(int j=0; j<BLOCKDIM;j++){
         intSum += As[row][j]*Bs[j][col];
       }
+
       __syncthreads();
     }
     Csub[row*n+col] = intSum;
-}
-
-    /* part 6: DGEMM function for GPUs, NVIDIA */
-    void matmult_gpulib(int M, int N, int K, double* A, double *B, double* C) {
-
-        /* Declare handle and initialize cublas */
-        cublasHandle_t handle;
-        cublasStatus_t status = cublasCreate(&handle);
-        if (status != CUBLAS_STATUS_SUCCESS) { // check if init successful
-            printf("Error: Initialization error CUBLAS. \n");
-            exit(1);
-        }
-
-        double alpha = 1.0; // no prefactor
-        double beta = 0.0; // C matrix not involved
-
-    
-        status = cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha, A, M, B, N, &beta, C, K);
-        if (status != CUBLAS_STATUS_SUCCESS) { // check no errors are outputed in the execution
-            printf("Error: Execution error CUBLAS. \n");
-            exit(1);
-        }
-
-        /* Destroy handle and free memory */
-        status = cublasDestroy(handle);
-        if (status != CUBLAS_STATUS_SUCCESS) {
-            printf("Error: Error destroying CUBLAS handle. \n");
-            exit(1);
-        }
-    }
-
-    __global__ void m5(int m, int n, int k, double *A, double *B, double *C) {
-    // This variable 'two_blocks' (the name can be changed to whatever) comes
-    // from the kernel invocation, and we have to "split" it manually into the
-    // two variables we want to use.
-    extern __shared__ double two_blocks[];
-    __shared__ double* A_s;
-    A_s = &two_blocks[0];
-    __shared__ double* B_s;
-    B_s = &two_blocks[blockDim.x*blockDim.y];
-
-    int topleft_row_A = blockIdx.y*blockDim.y*k;
-    int topleft_col_B = blockIdx.x*blockDim.x;
-
-    // The blocks HAVE to have the same size, otherwise this matrix-matrix
-    // mult on the small matrices cannot work.
-    const int bl_side = blockDim.x;
-    double sum;
-
-    for (int w = 0; w < k; w += bl_side) {
-
-        // We have to iterate over the two lines until reaching k.
-        int topleft_row_A_curr_block = topleft_row_A + w;
-        int topleft_col_B_curr_block = topleft_col_B + w*n;
-
-        A_s[threadIdx.y*bl_side + threadIdx.x] = A[topleft_row_A_curr_block + threadIdx.y*k + threadIdx.x];
-        // We just need each thread to load a single cell from the huge matrix
-        // A & B, no matter if they don't load the same they are going to work on.
-        B_s[threadIdx.y*bl_side + threadIdx.x] = B[topleft_col_B_curr_block + threadIdx.y*n + threadIdx.x];
-
-        __syncthreads();
-
-        sum = 0.0;
-        for (int it=0; it < bl_side; it++) {
-            sum += ( A_s[threadIdx.y*bl_side + it] * B_s[bl_side*it + threadIdx.x] );
-        }
-
-        // This second barrier syncronization is needed because there could be
-        // some threads that could repeat the w_for loop and change A_s and B_s
-        // while other are still reading from them.
-        __syncthreads();
-
-        // C[topleft_row_A_curr_block*n + topleft_col_B_curr_block + threadIdx.y*n + threadIdx.x] += sum;
-        C[blockIdx.y*blockDim.y*n + threadIdx.y*n + blockIdx.x*blockDim.x + threadIdx.x] += sum;
-
-    }
-}
-
-    void matmult_gpu6(int m, int n, int k, double *A, double *B, double *C) {
-        double* d_A, * d_B, * d_C;
-        cudaSetDevice(2);
-        cudaMalloc((void**)&d_A, m*k * sizeof(double));
-        cudaMalloc((void**)&d_B, k*n * sizeof(double));
-        cudaMalloc((void**)&d_C, m*n * sizeof(double));
-
-
-        cudaMemcpy(d_A, A, m*k * sizeof(double), cudaMemcpyHostToDevice);
-        cudaMemcpy(d_B, B, k*n * sizeof(double), cudaMemcpyHostToDevice);
-
-        // Initialize the output C matrix with zeroes.
-        cudaMemset(d_C, 0, m*n * sizeof(double));
-
-        int bs = 16;
-        dim3 blockDim(bs, bs);
-        dim3 gridDim( (m-1)/blockDim.x+1, (n-1)/blockDim.y+1 );
-
-
-        // https://devblogs.nvidia.com/parallelforall/using-shared-memory-cuda-cc/
-        // dynamically "pass" the shared memory to the kernel function.
-        // Otherwise we should place some constants in the kernel function.
-        m5<<<gridDim, blockDim, (blockDim.x*blockDim.y * 2 * sizeof(double))>>>(m, n, k, d_A, d_B, d_C);
-        cudaDeviceSynchronize();
-
-        cudaMemcpy(C, d_C, m*n * sizeof(double), cudaMemcpyDeviceToHost);
-
-        cudaFree(d_A); cudaFree(d_B); cudaFree(d_C);
-    }
 }
