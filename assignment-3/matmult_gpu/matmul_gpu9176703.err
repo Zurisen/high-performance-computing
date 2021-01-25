@@ -1,4 +1,0 @@
-Loaded module: cuda/11.1
-Loaded dependency [gcc/9.2.0]: binutils/2.29
-Loaded module: gcc/9.2.0
-rm: cannot remove 'OUTFILE': No such file or directory
